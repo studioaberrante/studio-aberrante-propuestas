@@ -381,6 +381,18 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-consultoria" placeholder="1" min="1"></div>
             </div>
           </div>
+
+          <div class="svc-card" id="svc-asesoria">
+            <div class="svc-card-top" onclick="toggleSvc('asesoria')">
+              <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+              <div class="svc-name">Asesoría Creativa Estratégica</div>
+              <span class="svc-tag tag-price">Con precio</span>
+            </div>
+            <div class="svc-fields">
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-asesoria" placeholder="ej. 300.000"></div>
+              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-asesoria" placeholder="1" min="1"></div>
+            </div>
+          </div>
         </div>
 
         <div class="group-label">Servicios a cotizar</div>
@@ -613,6 +625,7 @@ const SVC_META = {
   fotografia:{ name:'Fotografía Generada con IA', icon:'📸', desc:'Imágenes fotorrealistas de personas, productos, espacios y conceptos. Sin cámara, sin locación, sin límites creativos.' },
   campania:{ name:'Campañas Publicitarias IA', icon:'📣', desc:'Estrategia y producción completa de campañas publicitarias con assets generados por IA: gráficas, videos, copy y segmentación.' },
   consultoria:{ name:'Consultoría para Empresas', icon:'💼', desc:'Acompañamiento estratégico para integrar IA en los procesos de comunicación, marketing y producción de contenido de tu empresa.' },
+  asesoria:{ name:'Asesoría Creativa Estratégica', icon:'🧠', desc:'Servicio de dirección creativa mensual: ideas, guiones, enfoque editorial y optimización estratégica para mejorar resultados del contenido.' },
   ugc:{ name:'UGC Videos para Ads', icon:'📱', desc:'Videos estilo UGC producidos con IA para campañas de performance. Alta conversión, bajo costo.' },
   canciones:{ name:'Canciones Personalizadas', icon:'🎵', desc:'Composición y producción de canciones originales con voz e instrumentación generada por IA.' },
   visuales:{ name:'Visuales para Fiestas y Eventos', icon:'✨', desc:'Contenido visual inmersivo para pantallas en fiestas, eventos y activaciones: loops, VJ sets y ambientaciones.' },
