@@ -512,7 +512,7 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
             <div class="svc-fields">
               <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc" placeholder="A definir"></div>
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc" placeholder="1" min="1"></div>
-              <div class="svc-inline-note" id="ugc-discount-note">Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).</div>
+              <div class="svc-inline-note" id="ugc-discount-note">Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 26,25% de descuento en la unidad 32 (tope máximo).</div>
             </div>
           </div>
 
@@ -525,7 +525,7 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
             <div class="svc-fields">
               <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc_realista30" value="80.000" placeholder="80.000"></div>
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc_realista30" placeholder="8" min="8"></div>
-              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 30% en la unidad 30 (tope máximo).</div>
+              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 26,25% en la unidad 32 (tope máximo).</div>
             </div>
           </div>
 
@@ -1167,7 +1167,25 @@ const SERVICE_DEFAULT_BASE_CLP = {
   ugc_realista30: 80000
 };
 const SERVICE_DISCOUNT_RULES = {
-  ugc_realista30: { maxDiscountPct: 30, fixedUntil: 11, fullDiscountAt: 30 }
+  ugc: { maxDiscountPct: 26.25, fixedUntil: 4, fullDiscountAt: 32 }
+};
+const SERVICE_TIER_DISCOUNT_RULES = {
+  ugc: [
+    { minQty: 12, pct: 5 },
+    { minQty: 16, pct: 10 },
+    { minQty: 20, pct: 15 },
+    { minQty: 24, pct: 18.75 },
+    { minQty: 28, pct: 22.5 },
+    { minQty: 32, pct: 26.25 }
+  ],
+  ugc_realista30: [
+    { minQty: 12, pct: 5 },
+    { minQty: 16, pct: 10 },
+    { minQty: 20, pct: 15 },
+    { minQty: 24, pct: 18.75 },
+    { minQty: 28, pct: 22.5 },
+    { minQty: 32, pct: 26.25 }
+  ]
 };
 const ADDON_META = {
   clonacion: [
@@ -1207,14 +1225,31 @@ function getServiceDiscountRule(serviceKey){
   return { maxDiscountPct: 30, fixedUntil: 4, fullDiscountAt: 30 };
 }
 
+function getTierDiscountPct(serviceKey, qty){
+  const tiers = SERVICE_TIER_DISCOUNT_RULES[serviceKey];
+  if(!tiers || !tiers.length) return null;
+  let pct = 0;
+  tiers.forEach(tier => {
+    if(qty >= tier.minQty) pct = tier.pct;
+  });
+  return pct;
+}
+
 function defaultDiscountNote(serviceKey){
   if(serviceKey === 'ugc_realista30'){
-    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 30% en la unidad 30 (tope máximo).';
+    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 26,25% en la unidad 32 (tope máximo).';
+  }
+  if(serviceKey === 'ugc'){
+    return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 26,25% de descuento en la unidad 32 (tope máximo).';
   }
   return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).';
 }
 
 function unitPriceForService(serviceKey, baseUnitPrice, qty){
+  const tierPct = getTierDiscountPct(serviceKey, Math.max(1, qty || 1));
+  if(tierPct !== null){
+    return baseUnitPrice * (1 - (tierPct / 100));
+  }
   if(VOLUME_DISCOUNT_SERVICES.has(serviceKey)){
     const rule = getServiceDiscountRule(serviceKey);
     return calcUnitPriceLinear(baseUnitPrice, qty, rule.maxDiscountPct, rule.fixedUntil, rule.fullDiscountAt);
@@ -1237,6 +1272,11 @@ function updateVolumeDiscountPreview(serviceKey){
   const unitApplied = unitPriceForService(serviceKey, base, qty);
   const unitDiff = Math.max(0, base - unitApplied);
   const pct = base > 0 ? (unitDiff / base) * 100 : 0;
+  const tierPct = getTierDiscountPct(serviceKey, qty);
+  if(tierPct !== null){
+    note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Escala UGC: 12=>5% | 16=>10% | 20=>15% | 24=>18,75% | 28=>22,5% | 32=>26,25% (tope). Valores netos sin IVA.`;
+    return;
+  }
   const rule = getServiceDiscountRule(serviceKey);
   const startDiscountAt = rule.fixedUntil + 1;
   note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Descuento desde ${startDiscountAt} unidades. Tope máximo: ${rule.maxDiscountPct}%. Valores netos sin IVA.`;
