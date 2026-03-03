@@ -506,13 +506,26 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
           <div class="svc-card" id="svc-ugc">
             <div class="svc-card-top" onclick="toggleSvc('ugc')">
               <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
-              <div class="svc-name">UGC Videos para Ads</div>
+              <div class="svc-name">UGC Videos para Ads (15 seg)</div>
               <span class="svc-tag tag-noprice">A cotizar</span>
             </div>
             <div class="svc-fields">
               <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc" placeholder="A definir"></div>
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc" placeholder="1" min="1"></div>
               <div class="svc-inline-note" id="ugc-discount-note">Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).</div>
+            </div>
+          </div>
+
+          <div class="svc-card" id="svc-ugc_realista30">
+            <div class="svc-card-top" onclick="toggleSvc('ugc_realista30')">
+              <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+              <div class="svc-name">UGC Videos Realistas (30 seg)</div>
+              <span class="svc-tag tag-price">Con precio</span>
+            </div>
+            <div class="svc-fields">
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc_realista30" value="80.000" placeholder="80.000"></div>
+              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc_realista30" placeholder="8" min="8"></div>
+              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 30% en la unidad 30 (tope máximo).</div>
             </div>
           </div>
 
@@ -1136,7 +1149,8 @@ const SVC_META = {
   campania:{ name:'Campañas Publicitarias IA', icon:'📣', desc:'Estrategia y producción completa de campañas publicitarias con assets generados por IA: gráficas, videos, copy y segmentación.' },
   consultoria:{ name:'Consultoría para Empresas', icon:'💼', desc:'Acompañamiento estratégico para integrar IA en los procesos de comunicación, marketing y producción de contenido de tu empresa.' },
   asesoria:{ name:'Asesoría Creativa Estratégica', icon:'🧠', desc:'Servicio de dirección creativa mensual: ideas, guiones, enfoque editorial y optimización estratégica para mejorar resultados del contenido.' },
-  ugc:{ name:'UGC Videos para Ads', icon:'📱', desc:'Videos estilo UGC producidos con IA para campañas de performance. Alta conversión, bajo costo.' },
+  ugc:{ name:'UGC Videos para Ads (15 seg)', icon:'📱', desc:'Videos estilo UGC de 15 segundos producidos con IA para campañas de performance. Alta conversión, bajo costo.' },
+  ugc_realista30:{ name:'UGC Videos Realistas (30 seg)', icon:'🎬', desc:'Videos UGC realistas de 30 segundos producidos con IA. Precio base desde 8 unidades y descuento progresivo por volumen desde la unidad 12.' },
   canciones:{ name:'Canciones Personalizadas', icon:'🎵', desc:'Composición y producción de canciones originales con voz e instrumentación generada por IA.' },
   visuales:{ name:'Visuales para Fiestas y Eventos', icon:'✨', desc:'Contenido visual inmersivo para pantallas en fiestas, eventos y activaciones: loops, VJ sets y ambientaciones.' },
   aimodelos:{ name:'AI Modelos', icon:'🧍', desc:'Stock de modelos masculinos y femeninos generados con IA de distintas edades y características físicas, para marcas y e-commerce.' },
@@ -1145,7 +1159,16 @@ const SVC_META = {
 };
 const DRAFT_KEY = 'sa_proposal_draft_v4';
 const SERVICE_KEYS = Object.keys(SVC_META);
-const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','cortometraje','fotografia','ugc','ecommerce']);
+const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','cortometraje','fotografia','ugc','ugc_realista30','ecommerce']);
+const SERVICE_MIN_QTY = {
+  ugc_realista30: 8
+};
+const SERVICE_DEFAULT_BASE_CLP = {
+  ugc_realista30: 80000
+};
+const SERVICE_DISCOUNT_RULES = {
+  ugc_realista30: { maxDiscountPct: 30, fixedUntil: 11, fullDiscountAt: 30 }
+};
 const ADDON_META = {
   clonacion: [
     { id:'mantencion', label:'Mantención mensual en la nube', defaultAmount:40000, defaultOn:true },
@@ -1168,9 +1191,33 @@ function calcUnitPriceLinear(baseUnitPrice, qty, maxDiscountPct=30, fixedUntil=4
   return baseUnitPrice * (1 - (discountPct / 100));
 }
 
+function getServiceMinQty(serviceKey){
+  return SERVICE_MIN_QTY[serviceKey] || 1;
+}
+
+function getServiceBaseCLP(serviceKey, rawValue){
+  const parsed = parseCLP(rawValue);
+  if(parsed) return parsed;
+  return SERVICE_DEFAULT_BASE_CLP[serviceKey] || null;
+}
+
+function getServiceDiscountRule(serviceKey){
+  const custom = SERVICE_DISCOUNT_RULES[serviceKey];
+  if(custom) return custom;
+  return { maxDiscountPct: 30, fixedUntil: 4, fullDiscountAt: 30 };
+}
+
+function defaultDiscountNote(serviceKey){
+  if(serviceKey === 'ugc_realista30'){
+    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 30% en la unidad 30 (tope máximo).';
+  }
+  return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).';
+}
+
 function unitPriceForService(serviceKey, baseUnitPrice, qty){
   if(VOLUME_DISCOUNT_SERVICES.has(serviceKey)){
-    return calcUnitPriceLinear(baseUnitPrice, qty, 30, 4, 30);
+    const rule = getServiceDiscountRule(serviceKey);
+    return calcUnitPriceLinear(baseUnitPrice, qty, rule.maxDiscountPct, rule.fixedUntil, rule.fullDiscountAt);
   }
   return baseUnitPrice;
 }
@@ -1178,18 +1225,21 @@ function unitPriceForService(serviceKey, baseUnitPrice, qty){
 function updateVolumeDiscountPreview(serviceKey){
   const note = document.getElementById(`${serviceKey}-discount-note`);
   if(!note) return;
-  const base = parseCLP(v(`clp-${serviceKey}`));
-  const qty = Math.max(1, parseInt(v(`qty-${serviceKey}`), 10) || 1);
+  const base = getServiceBaseCLP(serviceKey, v(`clp-${serviceKey}`));
+  const minQty = getServiceMinQty(serviceKey);
+  const qty = Math.max(minQty, parseInt(v(`qty-${serviceKey}`), 10) || minQty);
 
   if(!base){
-    note.textContent = 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).';
+    note.textContent = defaultDiscountNote(serviceKey);
     return;
   }
 
   const unitApplied = unitPriceForService(serviceKey, base, qty);
   const unitDiff = Math.max(0, base - unitApplied);
   const pct = base > 0 ? (unitDiff / base) * 100 : 0;
-  note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Tope máximo: 30%.`;
+  const rule = getServiceDiscountRule(serviceKey);
+  const startDiscountAt = rule.fixedUntil + 1;
+  note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Descuento desde ${startDiscountAt} unidades. Tope máximo: ${rule.maxDiscountPct}%. Valores netos sin IVA.`;
 }
 
 function addonDefs(serviceKey){
@@ -1427,7 +1477,8 @@ function bindFormEvents(){
     });
     qtyInput.addEventListener('blur', () => {
       const n = parseInt(qtyInput.value, 10);
-      qtyInput.value = n && n > 0 ? String(n) : '';
+      const minQty = getServiceMinQty(key);
+      qtyInput.value = n && n > 0 ? String(Math.max(n, minQty)) : '';
       if(VOLUME_DISCOUNT_SERVICES.has(key)) updateVolumeDiscountPreview(key);
       saveDraft();
     });
@@ -1470,6 +1521,7 @@ updateVolumeDiscountPreview('podcast');
 updateVolumeDiscountPreview('cortometraje');
 updateVolumeDiscountPreview('fotografia');
 updateVolumeDiscountPreview('ugc');
+updateVolumeDiscountPreview('ugc_realista30');
 updateVolumeDiscountPreview('ecommerce');
 
 // ─── LOGO ─────────────────────────────────────────────────
@@ -1490,8 +1542,8 @@ function buildPricingBlockFromState(state, showUSD, tasa){
 
     const clpRaw = state && state.prices ? state.prices[key] : '';
     const qtyRaw = state && state.qty ? state.qty[key] : '';
-    const clpNum = parseCLP(clpRaw);
-    const qty = Math.max(1, parseInt(qtyRaw,10) || 1);
+    const clpNum = getServiceBaseCLP(key, clpRaw);
+    const qty = Math.max(getServiceMinQty(key), parseInt(qtyRaw,10) || getServiceMinQty(key));
     const serviceDesc = escapeHTML(m.desc).replace(/\n/g,'<br>');
     const unitAfterDiscount = clpNum ? unitPriceForService(key, clpNum, qty) : null;
     const discountPct = (clpNum && unitAfterDiscount && clpNum > 0)
