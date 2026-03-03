@@ -193,6 +193,13 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
   font-size:11px;color:var(--mid);line-height:1.5;
   background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 10px;
 }
+.pack-tag-row{
+  display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:8px;
+}
+.pack-tag-label{
+  font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.05em;
+}
+.pack-tag-select{font-size:12px}
 .addon-row{
   grid-column:1/-1;display:grid;grid-template-columns:auto 1fr 140px;gap:10px;
   align-items:center;background:#f8f8f8;border:1px solid var(--border);border-radius:10px;padding:10px 12px;
@@ -792,6 +799,17 @@ let packsEnabled = false;
 let nextPackId = 1;
 let packs = [];
 let includeMin3Months = true;
+const PACK_BADGE_OPTIONS = [
+  { value:'', label:'Sin etiqueta' },
+  { value:'recommended', label:'Recomendado' },
+  { value:'popular', label:'Más popular' },
+  { value:'best_price', label:'Mejor precio' }
+];
+const PACK_BADGE_TEXT = {
+  recommended: 'Recomendado',
+  popular: 'Más popular',
+  best_price: 'Mejor precio'
+};
 function setUSD(enabled){
   usdOn = !!enabled;
   document.getElementById('usd-switch').classList.toggle('on', usdOn);
@@ -921,6 +939,7 @@ function renderPacksList(){
   const list = document.getElementById('packs-list');
   if(!list) return;
   list.innerHTML = '';
+  const tagOptionsHTML = PACK_BADGE_OPTIONS.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('');
   packs.forEach(pack => {
     const item = document.createElement('div');
     item.className = 'pack-item';
@@ -929,6 +948,12 @@ function renderPacksList(){
         <input type="text" class="field-input pack-name-input" value="${escapeHTML(pack.name || '')}" placeholder="Nombre del pack">
         <button type="button" class="pack-btn load">Cargar</button>
       </div>
+      <div class="pack-tag-row">
+        <div class="pack-tag-label">Etiqueta</div>
+        <select class="field-input pack-tag-select">
+          ${tagOptionsHTML}
+        </select>
+      </div>
       <div class="pack-summary">${escapeHTML(describePackState(pack.state))}</div>
       <div class="pack-actions" style="margin-top:8px">
         <button type="button" class="pack-btn update">Actualizar con formulario actual</button>
@@ -936,9 +961,16 @@ function renderPacksList(){
       </div>
     `;
     const nameInput = item.querySelector('.pack-name-input');
+    const tagSelect = item.querySelector('.pack-tag-select');
+    tagSelect.value = pack.badge || '';
     nameInput.addEventListener('input', () => {
       pack.name = nameInput.value.trim() || `Pack ${packs.indexOf(pack) + 1}`;
       saveDraft();
+    });
+    tagSelect.addEventListener('change', () => {
+      pack.badge = tagSelect.value || '';
+      saveDraft();
+      refreshPreviewIfGenerated();
     });
     item.querySelector('.pack-btn.load').addEventListener('click', () => {
       applyServiceState(cloneServiceState(pack.state));
@@ -970,6 +1002,7 @@ function addPackFromCurrent(data = null){
   const pack = {
     id: packId,
     name: (data && data.name) ? data.name : `Pack ${packs.length + 1}`,
+    badge: (data && data.badge) ? data.badge : '',
     state
   };
   packs.push(pack);
@@ -1431,6 +1464,7 @@ function saveDraft(){
     packs: packs.map(p => ({
       id: p.id,
       name: p.name,
+      badge: p.badge || '',
       state: cloneServiceState(p.state)
     })),
     selected: selectedSvcs(),
@@ -1483,6 +1517,7 @@ function restoreDraft(){
         addPackFromCurrent({
           id: Number(p.id) || nextPackId++,
           name: p.name || `Pack ${idx + 1}`,
+          badge: p.badge || '',
           state: p.state
         });
       }
@@ -1880,6 +1915,13 @@ function buildConditionsHTML(includeMin3){
   }).join('');
 }
 
+function getPackBadgeHTML(badgeKey){
+  const key = String(badgeKey || '').trim();
+  const text = PACK_BADGE_TEXT[key];
+  if(!text) return '';
+  return `<span class="pack-badge pack-badge-${key}">${text}</span>`;
+}
+
 function generateProposal(opts = {}){
   const silent = !!opts.silent;
   const clienteRaw = v('f-cliente') || 'Cliente';
@@ -1912,10 +1954,14 @@ function generateProposal(opts = {}){
     const packBlocks = packs.map((pack, idx) => {
       const data = buildPricingBlockFromState(pack.state, showUSD, tasa);
       const pname = escapeHTML((pack.name || `Pack ${idx + 1}`).trim());
+      const pbadge = getPackBadgeHTML(pack.badge);
       return `
       <div class="pack-block liquid-glass">
         <div class="pack-head">
-          <div class="pack-name">${pname}</div>
+          <div>
+            ${pbadge}
+            <div class="pack-name">${pname}</div>
+          </div>
           <div class="pack-meta">${data.count} ítem${data.count !== 1 ? 's' : ''}</div>
         </div>
         <div class="services-list pack-services">
@@ -2207,6 +2253,14 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,252,0.78);backdrop
 }
 .pack-name{font-family:'DM Serif Display',serif;font-size:28px;line-height:1.1}
 .pack-meta{font-size:12px;color:var(--mid);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.pack-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border-radius:999px;padding:6px 10px;margin-bottom:8px;
+}
+.pack-badge-recommended{background:#e8f6ed;color:#1e7e47;border:1px solid #ccebd8}
+.pack-badge-popular{background:#eef4ff;color:#2258b8;border:1px solid #d4e2ff}
+.pack-badge-best_price{background:#fff2de;color:#b55b00;border:1px solid #ffe4bf}
 .pack-services{gap:8px}
 .service-card{
   background:transparent;border:1px solid transparent;border-radius:var(--r2);
@@ -2445,6 +2499,9 @@ body.has-custom-bg .section-title{color:#fff;text-shadow:0 10px 28px rgba(0,0,0,
 body.has-custom-bg .section-count{color:rgba(244,248,252,.72)}
 body.has-custom-bg .pack-name{color:#fff}
 body.has-custom-bg .pack-meta{color:rgba(244,248,252,.78)}
+body.has-custom-bg .pack-badge-recommended{background:rgba(25,126,71,.22);color:#b9f3d3;border-color:rgba(185,243,211,.35)}
+body.has-custom-bg .pack-badge-popular{background:rgba(34,88,184,.24);color:#cde0ff;border-color:rgba(205,224,255,.38)}
+body.has-custom-bg .pack-badge-best_price{background:rgba(181,91,0,.24);color:#ffe5c2;border-color:rgba(255,229,194,.38)}
 body.has-custom-bg .hero::before{
   content:'';position:absolute;right:-42px;top:-24px;width:220px;height:220px;border-radius:50%;
   background:radial-gradient(circle at 30% 30%, rgba(139,233,223,.32), rgba(139,233,223,0) 68%);
