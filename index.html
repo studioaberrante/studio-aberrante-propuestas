@@ -525,7 +525,7 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
             <div class="svc-fields">
               <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc_realista30" value="80.000" placeholder="80.000"></div>
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc_realista30" placeholder="8" min="8"></div>
-              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 26,25% en la unidad 32 (tope máximo).</div>
+              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 24% en la unidad 32 (tope máximo).</div>
             </div>
           </div>
 
@@ -1188,18 +1188,11 @@ const SERVICE_DEFAULT_BASE_CLP = {
   multiidioma: 6000
 };
 const SERVICE_DISCOUNT_RULES = {
-  ugc: { maxDiscountPct: 26.25, fixedUntil: 4, fullDiscountAt: 32 }
+  ugc: { maxDiscountPct: 26.25, fixedUntil: 4, fullDiscountAt: 32 },
+  ugc_realista30: { maxDiscountPct: 24, fixedUntil: 11, fullDiscountAt: 32 }
 };
 const SERVICE_TIER_DISCOUNT_RULES = {
   ugc: [
-    { minQty: 12, pct: 5 },
-    { minQty: 16, pct: 10 },
-    { minQty: 20, pct: 15 },
-    { minQty: 24, pct: 18.75 },
-    { minQty: 28, pct: 22.5 },
-    { minQty: 32, pct: 26.25 }
-  ],
-  ugc_realista30: [
     { minQty: 12, pct: 5 },
     { minQty: 16, pct: 10 },
     { minQty: 20, pct: 15 },
@@ -1276,7 +1269,7 @@ function getTierUnitPrice(serviceKey, qty){
 
 function defaultDiscountNote(serviceKey){
   if(serviceKey === 'ugc_realista30'){
-    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 26,25% en la unidad 32 (tope máximo).';
+    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 24% en la unidad 32 (tope máximo).';
   }
   if(serviceKey === 'ugc'){
     return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 26,25% de descuento en la unidad 32 (tope máximo).';
