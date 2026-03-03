@@ -1208,6 +1208,8 @@ const SERVICE_TIER_UNIT_PRICE = {
     3: 6000
   }
 };
+const OPTIONAL_ONLY_SERVICES = new Set(['multiidioma']);
+const UGC_BASE_SERVICES = new Set(['ugc','ugc_realista30']);
 const ADDON_META = {
   clonacion: [
     { id:'mantencion', label:'Mantención mensual en la nube', defaultAmount:40000, defaultOn:true },
@@ -1628,13 +1630,14 @@ const LOGO_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAucAAAD/CAYAAABSHXgXAAAACXBIWXMAAC4jAA
 // ─── GENERATE ─────────────────────────────────────────────
 function buildPricingBlockFromState(state, showUSD, tasa){
   const svcs = Array.isArray(state && state.selected) ? state.selected : [];
+  const proposalSvcs = svcs.filter(key => !OPTIONAL_ONLY_SERVICES.has(key));
   let cards = '';
   let monthlyTotalCLP = 0;
   let oneTimeTotalCLP = 0;
   let hasMonthlyTotal = false;
   let hasOneTimeTotal = false;
 
-  svcs.forEach(key => {
+  proposalSvcs.forEach(key => {
     const m = SVC_META[key];
     if(!m) return;
 
@@ -1775,12 +1778,45 @@ function buildPricingBlockFromState(state, showUSD, tasa){
     totalsHTML += `</div>`;
   }
 
-  const hasOneTimeServices = svcs.includes('avatar') || svcs.includes('clonacion');
+  const hasOneTimeServices = proposalSvcs.includes('avatar') || proposalSvcs.includes('clonacion');
   const billingNoteHTML = hasOneTimeServices
     ? `<div class="billing-note liquid-glass">Nota de facturación: La creación de Avatar Digital y la Clonación Digital se cobran como pago único. El único cobro mensual recurrente asociado a clonación corresponde a la mantención en nube cuando aplica.</div>`
     : '';
 
-  return { count: svcs.length, cards, totalsHTML, billingNoteHTML };
+  return { count: proposalSvcs.length, cards, totalsHTML, billingNoteHTML };
+}
+
+function buildMultiidiomaAddonHTML(){
+  return `
+  <div class="addon-multiidioma">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Add-on opcional</div>
+        <div class="section-title">Pack Multiidioma — Doblaje + Subtítulos IA</div>
+      </div>
+    </div>
+    <div class="addon-multi-desc liquid-glass">
+      El mismo video, en hasta 3 idiomas o acentos distintos. Sin volver a filmar: lip-sync IA y subtítulos adaptados por idioma.
+    </div>
+    <div class="addon-multi-grid">
+      <div class="addon-multi-card liquid-glass">
+        <div class="addon-multi-top">1 idioma adicional</div>
+        <div class="addon-multi-price">$7.000 <span>por video · por idioma</span></div>
+        <div class="addon-multi-note">Valores netos sin IVA</div>
+      </div>
+      <div class="addon-multi-card liquid-glass">
+        <div class="addon-multi-top">2 idiomas adicionales</div>
+        <div class="addon-multi-price">$6.500 <span>por video · por idioma</span></div>
+        <div class="addon-multi-note">Valores netos sin IVA</div>
+      </div>
+      <div class="addon-multi-card liquid-glass">
+        <div class="addon-multi-top">3 idiomas adicionales</div>
+        <div class="addon-multi-price">$6.000 <span>por video · por idioma</span></div>
+        <div class="addon-multi-note">Valores netos sin IVA</div>
+      </div>
+    </div>
+    <div class="addon-multi-foot">Este add-on es opcional y no está incluido en el total de esta propuesta. Se activa solo si el cliente lo solicita.</div>
+  </div>`;
 }
 
 function generateProposal(opts = {}){
@@ -1804,9 +1840,14 @@ function generateProposal(opts = {}){
   let servicesHTML = '';
   let sectionTitle = 'Lo que incluye<br>esta propuesta';
   let sectionCountLabel = '';
-  let selectedCount = currentState.selected.length;
+  let selectedCount = currentState.selected.filter(key => !OPTIONAL_ONLY_SERVICES.has(key)).length;
+  let showMultiidiomaAddon = false;
 
   if(packsEnabled && packs.length > 0){
+    showMultiidiomaAddon = packs.some(pack => {
+      const selected = Array.isArray(pack && pack.state && pack.state.selected) ? pack.state.selected : [];
+      return selected.some(key => UGC_BASE_SERVICES.has(key));
+    });
     const packBlocks = packs.map((pack, idx) => {
       const data = buildPricingBlockFromState(pack.state, showUSD, tasa);
       const pname = escapeHTML((pack.name || `Pack ${idx + 1}`).trim());
@@ -1828,7 +1869,9 @@ function generateProposal(opts = {}){
     sectionCountLabel = `${packs.length} pack${packs.length !== 1 ? 's' : ''}`;
     selectedCount = packs.length;
   } else {
-    if(!currentState.selected.length){
+    const mainSelected = currentState.selected.filter(key => !OPTIONAL_ONLY_SERVICES.has(key));
+    showMultiidiomaAddon = mainSelected.some(key => UGC_BASE_SERVICES.has(key));
+    if(!mainSelected.length){
       alert('Seleccioná al menos un servicio antes de generar la propuesta.');
       return;
     }
@@ -1887,6 +1930,8 @@ function generateProposal(opts = {}){
     }
   }
 
+  const multiidiomaAddonHTML = showMultiidiomaAddon ? buildMultiidiomaAddonHTML() : '';
+
   const currency_label = (showUSD && tasa) ? 'USD' : 'CLP';
   const html = buildHTML(
     cliente,
@@ -1895,6 +1940,7 @@ function generateProposal(opts = {}){
     selectedCount,
     sectionTitle,
     sectionCountLabel,
+    multiidiomaAddonHTML,
     examplesHTML,
     currency_label,
     {
@@ -1938,7 +1984,7 @@ function downloadProposal(){
 }
 
 // ─── PROPOSAL HTML ────────────────────────────────────────
-function buildHTML(cliente, nota, servicesHTML, count, sectionTitle, sectionCountLabel, examplesHTML, currency_label, visualCfg){
+function buildHTML(cliente, nota, servicesHTML, count, sectionTitle, sectionCountLabel, multiidiomaAddonHTML, examplesHTML, currency_label, visualCfg){
 const date = new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
 const hasCustomBg = !!(visualCfg && visualCfg.bgDataUrl);
 const overlay = Math.max(35, Math.min(85, Number(visualCfg && visualCfg.bgOverlay) || 58));
@@ -2124,6 +2170,30 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,252,0.78);backdrop
   margin-top:10px;background:transparent;border:1px solid transparent;border-radius:16px;
   padding:14px 16px;font-size:12px;line-height:1.6;color:var(--mid);
   box-shadow:var(--glass-shadow);
+}
+.addon-multiidioma{padding-bottom:64px}
+.addon-multi-desc{
+  padding:18px 20px;border-radius:var(--r2);font-size:15px;line-height:1.7;color:var(--mid);
+  margin-bottom:12px;
+}
+.addon-multi-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+}
+.addon-multi-card{
+  border-radius:var(--r2);padding:20px 18px;border:1px solid transparent;
+}
+.addon-multi-top{
+  font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);margin-bottom:10px;
+}
+.addon-multi-price{
+  font-family:'DM Serif Display',serif;font-size:36px;line-height:1;color:var(--black);margin-bottom:8px;
+}
+.addon-multi-price span{
+  display:block;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--mid);margin-top:6px;
+}
+.addon-multi-note{font-size:12px;color:var(--mid)}
+.addon-multi-foot{
+  margin-top:10px;font-size:12px;color:var(--mid);line-height:1.6;
 }
 /* TOTAL */
 .totals-wrap{display:flex;flex-direction:column;gap:10px;margin-top:10px}
@@ -2327,6 +2397,10 @@ body.has-custom-bg .intro-heading,
 body.has-custom-bg .intro-body,
 body.has-custom-bg .sc-name,
 body.has-custom-bg .sc-desc,
+body.has-custom-bg .addon-multi-desc,
+body.has-custom-bg .addon-multi-top,
+body.has-custom-bg .addon-multi-note,
+body.has-custom-bg .addon-multi-foot,
 body.has-custom-bg .ex-title,
 body.has-custom-bg .ex-service,
 body.has-custom-bg .cond-num,
@@ -2339,10 +2413,12 @@ body.has-custom-bg .billing-note{
 }
 body.has-custom-bg .sc-price-main,
 body.has-custom-bg .sc-price-unit,
-body.has-custom-bg .sc-price-total{color:#fff}
+body.has-custom-bg .sc-price-total,
+body.has-custom-bg .addon-multi-price{color:#fff}
 body.has-custom-bg .sc-price-main span,
 body.has-custom-bg .sc-price-unit span,
 body.has-custom-bg .sc-price-total span,
+body.has-custom-bg .addon-multi-price span,
 body.has-custom-bg .sc-addon span{color:rgba(231,238,244,.75)}
 body.has-custom-bg .sc-addon{color:rgba(240,246,250,.92)}
 body.has-custom-bg .sc-price-tbd{
@@ -2363,6 +2439,7 @@ body.has-custom-bg .sc-price-tbd{
   .cta-card{grid-template-columns:1fr;padding:36px 28px}
   .cta-btns{flex-direction:row;flex-wrap:wrap}
   .service-card{grid-template-columns:36px 1fr;gap:14px}
+  .addon-multi-grid{grid-template-columns:1fr}
   .examples-grid{grid-template-columns:1fr}
   .sc-right{grid-column:2;text-align:left}
   footer{flex-direction:column;gap:16px;text-align:center}
@@ -2441,6 +2518,8 @@ body.has-custom-bg .sc-price-tbd{
     </div>
     ${servicesHTML}
   </div>
+
+  ${multiidiomaAddonHTML}
 
   ${examplesHTML}
 
