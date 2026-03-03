@@ -1224,6 +1224,14 @@ const SERVICE_TIER_DISCOUNT_RULES = {
     { minQty: 24, pct: 18.75 },
     { minQty: 28, pct: 22.5 },
     { minQty: 32, pct: 26.25 }
+  ],
+  ugc_realista30: [
+    { minQty: 12, pct: 5 },
+    { minQty: 16, pct: 10 },
+    { minQty: 20, pct: 15 },
+    { minQty: 24, pct: 18 },
+    { minQty: 28, pct: 21 },
+    { minQty: 32, pct: 24 }
   ]
 };
 const SERVICE_TIER_UNIT_PRICE = {
@@ -1296,7 +1304,7 @@ function getTierUnitPrice(serviceKey, qty){
 
 function defaultDiscountNote(serviceKey){
   if(serviceKey === 'ugc_realista30'){
-    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 24% en la unidad 32 (tope máximo).';
+    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento por tramos: 12=>5% | 16=>10% | 20=>15% | 24=>18% | 28=>21% | 32=>24% (tope).';
   }
   if(serviceKey === 'ugc'){
     return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 26,25% de descuento en la unidad 32 (tope máximo).';
@@ -1353,7 +1361,10 @@ function updateVolumeDiscountPreview(serviceKey){
   const pct = base > 0 ? (unitDiff / base) * 100 : 0;
   const tierPct = getTierDiscountPct(serviceKey, qty);
   if(tierPct !== null){
-    note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Escala UGC: 12=>5% | 16=>10% | 20=>15% | 24=>18,75% | 28=>22,5% | 32=>26,25% (tope). Valores netos sin IVA.`;
+    const scaleText = serviceKey === 'ugc_realista30'
+      ? '12=>5% | 16=>10% | 20=>15% | 24=>18% | 28=>21% | 32=>24% (tope)'
+      : '12=>5% | 16=>10% | 20=>15% | 24=>18,75% | 28=>22,5% | 32=>26,25% (tope)';
+    note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Escala UGC: ${scaleText}. Valores netos sin IVA.`;
     return;
   }
   const rule = getServiceDiscountRule(serviceKey);
