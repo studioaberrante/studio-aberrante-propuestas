@@ -719,6 +719,24 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
 
       <div class="divider"></div>
 
+      <!-- STEP 7: CONDICIONES -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">7</div>
+          <div class="step-title">Condiciones opcionales</div>
+        </div>
+
+        <div class="usd-section">
+          <label class="examples-toggle">
+            <input type="checkbox" id="f-cond-min3" checked>
+            Incluir condición “Mínimo 3 meses”
+          </label>
+          <div class="field-hint">Si está desactivado, esa tarjeta no aparece en la propuesta final.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
       <button type="button" class="gen-btn" onclick="generateProposal()">Generar propuesta →</button>
       <button type="button" class="dl-btn" id="dl-btn" onclick="downloadProposal()">↓ Descargar HTML</button>
       <button type="button" class="ghost-btn" onclick="resetForm()">Limpiar formulario</button>
@@ -773,6 +791,7 @@ let nextExampleId = 1;
 let packsEnabled = false;
 let nextPackId = 1;
 let packs = [];
+let includeMin3Months = true;
 function setUSD(enabled){
   usdOn = !!enabled;
   document.getElementById('usd-switch').classList.toggle('on', usdOn);
@@ -808,6 +827,12 @@ function setPacksEnabled(enabled){
   const wrap = document.getElementById('packs-wrap');
   if(checkbox) checkbox.checked = packsEnabled;
   if(wrap) wrap.classList.toggle('on', packsEnabled);
+}
+
+function setMin3MonthsEnabled(enabled){
+  includeMin3Months = !!enabled;
+  const checkbox = document.getElementById('f-cond-min3');
+  if(checkbox) checkbox.checked = includeMin3Months;
 }
 
 function emptyServiceState(){
@@ -1390,6 +1415,7 @@ function saveDraft(){
     visualOpen: visualStepOpen,
     examplesEnabled,
     packsEnabled,
+    includeMin3Months,
     examples: examplesForDraft,
     packs: packs.map(p => ({
       id: p.id,
@@ -1435,6 +1461,7 @@ function restoreDraft(){
     setVisualStep(!!draft.visualOpen);
     setExamplesEnabled(!!draft.examplesEnabled);
     setPacksEnabled(!!draft.packsEnabled);
+    setMin3MonthsEnabled(draft.includeMin3Months !== false);
     document.getElementById('examples-list').innerHTML = '';
     nextExampleId = 1;
     (Array.isArray(draft.examples) ? draft.examples : []).forEach(ex => addExampleRow(ex));
@@ -1488,7 +1515,7 @@ function formatCLPInput(input){
 
 function bindFormEvents(){
   const ids = [
-    'f-cliente','f-nota','f-tasa','f-examples-enabled','f-packs-enabled',
+    'f-cliente','f-nota','f-tasa','f-examples-enabled','f-packs-enabled','f-cond-min3',
     ...SERVICE_KEYS.flatMap(k => ['clp-'+k,'qty-'+k])
   ];
   ids.forEach(id => {
@@ -1525,6 +1552,14 @@ function bindFormEvents(){
     packsToggle.addEventListener('change', () => {
       setPacksEnabled(packsToggle.checked);
       saveDraft();
+    });
+  }
+  const min3Toggle = document.getElementById('f-cond-min3');
+  if(min3Toggle){
+    min3Toggle.addEventListener('change', () => {
+      setMin3MonthsEnabled(min3Toggle.checked);
+      saveDraft();
+      refreshPreviewIfGenerated();
     });
   }
 
@@ -1819,6 +1854,21 @@ function buildMultiidiomaAddonHTML(){
   </div>`;
 }
 
+function buildConditionsHTML(includeMin3){
+  const items = [
+    { title:'Pago mensual', body:'Primeros 5 días del mes. Transferencia o Mercado Pago.' },
+    ...(includeMin3 ? [{ title:'Mínimo 3 meses', body:'Contratación mínima para garantizar resultados.' }] : []),
+    { title:'Reunión semanal', body:'Check-in semanal incluido en todos los servicios.' },
+    { title:'Precios netos', body:'Sin IVA. Se agrega según corresponda por ley.' },
+    { title:'Inicio en 5 días', body:'Comenzamos dentro de los 5 días hábiles de confirmar.' },
+    { title:'Soporte directo', body:'Canal directo con el equipo durante todo el proceso.' }
+  ];
+  return items.map((item, idx) => {
+    const num = String(idx + 1).padStart(2, '0');
+    return `<div class="cond-card liquid-glass"><div class="cond-num">${num}</div><div class="cond-title">${item.title}</div><div class="cond-body">${item.body}</div></div>`;
+  }).join('');
+}
+
 function generateProposal(opts = {}){
   const silent = !!opts.silent;
   const clienteRaw = v('f-cliente') || 'Cliente';
@@ -1931,6 +1981,7 @@ function generateProposal(opts = {}){
   }
 
   const multiidiomaAddonHTML = showMultiidiomaAddon ? buildMultiidiomaAddonHTML() : '';
+  const conditionsHTML = buildConditionsHTML(includeMin3Months);
 
   const currency_label = (showUSD && tasa) ? 'USD' : 'CLP';
   const html = buildHTML(
@@ -1941,6 +1992,7 @@ function generateProposal(opts = {}){
     sectionTitle,
     sectionCountLabel,
     multiidiomaAddonHTML,
+    conditionsHTML,
     examplesHTML,
     currency_label,
     {
@@ -1984,7 +2036,7 @@ function downloadProposal(){
 }
 
 // ─── PROPOSAL HTML ────────────────────────────────────────
-function buildHTML(cliente, nota, servicesHTML, count, sectionTitle, sectionCountLabel, multiidiomaAddonHTML, examplesHTML, currency_label, visualCfg){
+function buildHTML(cliente, nota, servicesHTML, count, sectionTitle, sectionCountLabel, multiidiomaAddonHTML, conditionsHTML, examplesHTML, currency_label, visualCfg){
 const date = new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
 const hasCustomBg = !!(visualCfg && visualCfg.bgDataUrl);
 const overlay = Math.max(35, Math.min(85, Number(visualCfg && visualCfg.bgOverlay) || 58));
@@ -2527,12 +2579,7 @@ body.has-custom-bg .sc-price-tbd{
     <div class="section-label">Condiciones</div>
     <div class="section-title">Cómo trabajamos</div>
     <div class="conds-grid">
-      <div class="cond-card liquid-glass"><div class="cond-num">01</div><div class="cond-title">Pago mensual</div><div class="cond-body">Primeros 5 días del mes. Transferencia o Mercado Pago.</div></div>
-      <div class="cond-card liquid-glass"><div class="cond-num">02</div><div class="cond-title">Mínimo 3 meses</div><div class="cond-body">Contratación mínima para garantizar resultados.</div></div>
-      <div class="cond-card liquid-glass"><div class="cond-num">03</div><div class="cond-title">Reunión semanal</div><div class="cond-body">Check-in semanal incluido en todos los servicios.</div></div>
-      <div class="cond-card liquid-glass"><div class="cond-num">04</div><div class="cond-title">Precios netos</div><div class="cond-body">Sin IVA. Se agrega según corresponda por ley.</div></div>
-      <div class="cond-card liquid-glass"><div class="cond-num">05</div><div class="cond-title">Inicio en 5 días</div><div class="cond-body">Comenzamos dentro de los 5 días hábiles de confirmar.</div></div>
-      <div class="cond-card liquid-glass"><div class="cond-num">06</div><div class="cond-title">Soporte directo</div><div class="cond-body">Canal directo con el equipo durante todo el proceso.</div></div>
+      ${conditionsHTML}
     </div>
   </div>
 
