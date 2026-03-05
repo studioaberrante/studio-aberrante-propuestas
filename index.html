@@ -481,6 +481,23 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-asesoria" placeholder="1" min="1"></div>
             </div>
           </div>
+
+          <div class="svc-card" id="svc-personalizado">
+            <div class="svc-card-top" onclick="toggleSvc('personalizado')">
+              <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+              <div class="svc-name">Servicio personalizado</div>
+              <span class="svc-tag tag-price">Con precio</span>
+            </div>
+            <div class="svc-fields">
+              <div class="field" style="grid-column:1/-1"><label class="field-label">Nombre del servicio</label><input type="text" class="field-input" id="custom-name-personalizado" placeholder="ej. Funnel IA para lanzamientos"></div>
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-personalizado" placeholder="ej. 120.000"></div>
+              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-personalizado" placeholder="1" min="1"></div>
+              <div class="field"><label class="field-label">Tope descuento %</label><input type="number" class="field-input" id="custom-maxdisc-personalizado" value="20" min="0" max="80"></div>
+              <div class="field"><label class="field-label">Desde unidad</label><input type="number" class="field-input" id="custom-discfrom-personalizado" value="5" min="2"></div>
+              <div class="field" style="grid-column:1/-1"><label class="field-label">Llega al tope en unidad</label><input type="number" class="field-input" id="custom-discto-personalizado" value="30" min="3"></div>
+              <div class="svc-inline-note" id="personalizado-discount-note">Configurá la regla de volumen: desde la unidad indicada empieza el descuento progresivo y llega al tope en la unidad final.</div>
+            </div>
+          </div>
         </div>
 
         <div class="group-label">Servicios a cotizar</div>
@@ -857,15 +874,17 @@ function emptyServiceState(){
   const prices = {};
   const qty = {};
   const addons = {};
+  const custom = {};
   SERVICE_KEYS.forEach(key => {
     prices[key] = '';
     qty[key] = '';
     addons[key] = {};
+    custom[key] = {};
     addonDefs(key).forEach(def => {
       addons[key][def.id] = { on: !!def.defaultOn, amount: fmtCLP(def.defaultAmount) };
     });
   });
-  return { selected: [], prices, qty, addons };
+  return { selected: [], prices, qty, addons, custom };
 }
 
 function collectCurrentServiceState(){
@@ -881,6 +900,12 @@ function collectCurrentServiceState(){
       };
     });
   });
+  state.custom.personalizado = {
+    name: v('custom-name-personalizado'),
+    maxDiscPct: v('custom-maxdisc-personalizado'),
+    discFrom: v('custom-discfrom-personalizado'),
+    discTo: v('custom-discto-personalizado')
+  };
   return state;
 }
 
@@ -917,6 +942,15 @@ function applyServiceState(state){
       }
     });
   });
+  const customName = document.getElementById('custom-name-personalizado');
+  const customMax = document.getElementById('custom-maxdisc-personalizado');
+  const customFrom = document.getElementById('custom-discfrom-personalizado');
+  const customTo = document.getElementById('custom-discto-personalizado');
+  const savedCustom = st.custom && st.custom.personalizado ? st.custom.personalizado : {};
+  if(customName) customName.value = savedCustom.name || '';
+  if(customMax) customMax.value = savedCustom.maxDiscPct || '20';
+  if(customFrom) customFrom.value = savedCustom.discFrom || '5';
+  if(customTo) customTo.value = savedCustom.discTo || '30';
   updateVolumeDiscountPreview('podcast');
   updateVolumeDiscountPreview('cortometraje');
   updateVolumeDiscountPreview('fotografia');
@@ -924,6 +958,7 @@ function applyServiceState(state){
   updateVolumeDiscountPreview('ugc_realista30');
   updateVolumeDiscountPreview('ecommerce');
   updateMultiidiomaPreview();
+  updatePersonalizadoPreview();
   saveDraft();
 }
 
@@ -1222,6 +1257,7 @@ const SVC_META = {
   campania:{ name:'Campañas Publicitarias IA', icon:'📣', desc:'Estrategia y producción completa de campañas publicitarias con assets generados por IA: gráficas, videos, copy y segmentación.' },
   consultoria:{ name:'Consultoría para Empresas', icon:'💼', desc:'Acompañamiento estratégico para integrar IA en los procesos de comunicación, marketing y producción de contenido de tu empresa.' },
   asesoria:{ name:'Asesoría Creativa Estratégica', icon:'🧠', desc:'Servicio de dirección creativa mensual: ideas, guiones, enfoque editorial y optimización estratégica para mejorar resultados del contenido.' },
+  personalizado:{ name:'Servicio personalizado', icon:'🧩', desc:'Servicio definido a medida según la reunión con el cliente. Nombre, precio y lógica de descuento configurables por propuesta.' },
   ugc:{ name:'UGC Videos para Ads (15 seg)', icon:'📱', desc:'Videos estilo UGC de 15 segundos producidos con IA para campañas de performance. Alta conversión, bajo costo.' },
   ugc_realista30:{ name:'UGC Videos Realistas (30 seg)', icon:'🎬', desc:'Videos UGC realistas de 30 segundos producidos con IA. Precio base desde 8 unidades y descuento progresivo por volumen desde la unidad 12.' },
   multiidioma:{ name:'Pack Multiidioma — Doblaje + Subtítulos IA', icon:'🌐', desc:'Doblaje con lip-sync IA + subtítulos adaptados por idioma. Add-on sobre cualquier pack UGC. Valores netos sin IVA.' },
@@ -1335,6 +1371,17 @@ function getTierUnitPrice(serviceKey, qty){
   return tiers[q] || null;
 }
 
+function getPersonalizadoConfig(state){
+  const src = state && state.custom && state.custom.personalizado ? state.custom.personalizado : null;
+  const rawMax = src ? Number(src.maxDiscPct) : Number(v('custom-maxdisc-personalizado'));
+  const rawFrom = src ? Number(src.discFrom) : Number(v('custom-discfrom-personalizado'));
+  const rawTo = src ? Number(src.discTo) : Number(v('custom-discto-personalizado'));
+  const maxDiscPct = Number.isFinite(rawMax) ? Math.max(0, Math.min(80, rawMax)) : 20;
+  const discFrom = Number.isFinite(rawFrom) ? Math.max(2, Math.round(rawFrom)) : 5;
+  const discTo = Number.isFinite(rawTo) ? Math.max(discFrom + 1, Math.round(rawTo)) : 30;
+  return { maxDiscPct, discFrom, discTo };
+}
+
 function defaultDiscountNote(serviceKey){
   if(serviceKey === 'ugc_realista30'){
     return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento por tramos: 12=>5% | 16=>10% | 20=>15% | 24=>18% | 28=>21% | 32=>24% (tope).';
@@ -1345,7 +1392,11 @@ function defaultDiscountNote(serviceKey){
   return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).';
 }
 
-function unitPriceForService(serviceKey, baseUnitPrice, qty){
+function unitPriceForService(serviceKey, baseUnitPrice, qty, state){
+  if(serviceKey === 'personalizado'){
+    const cfg = getPersonalizadoConfig(state);
+    return calcUnitPriceLinear(baseUnitPrice, qty, cfg.maxDiscPct, cfg.discFrom - 1, cfg.discTo);
+  }
   const tierUnit = getTierUnitPrice(serviceKey, Math.max(1, qty || 1));
   if(tierUnit !== null){
     return tierUnit;
@@ -1375,6 +1426,21 @@ function updateMultiidiomaPreview(){
   qtyInput.value = String(qty);
   clpInput.value = fmtCLP(unit);
   note.textContent = `Referencia interna (no visible en propuesta final): 1 idioma => $7.000/video/idioma | 2 idiomas => $6.500/video/idioma | 3 idiomas => $6.000/video/idioma. Selección actual: ${qty} idioma${qty !== 1 ? 's' : ''} => $${fmtCLP(unit)}/video/idioma. Valores netos sin IVA.`;
+}
+
+function updatePersonalizadoPreview(){
+  const note = document.getElementById('personalizado-discount-note');
+  if(!note) return;
+  const base = parseCLP(v('clp-personalizado'));
+  const qty = Math.max(1, parseInt(v('qty-personalizado'), 10) || 1);
+  const cfg = getPersonalizadoConfig();
+  if(!base){
+    note.textContent = `Configurá la regla de volumen: desde ${cfg.discFrom} unidades empieza el descuento y llega a ${cfg.maxDiscPct}% en la unidad ${cfg.discTo}.`;
+    return;
+  }
+  const unitApplied = unitPriceForService('personalizado', base, qty);
+  const pct = base > 0 ? ((base - unitApplied) / base) * 100 : 0;
+  note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base: $${fmtCLP(base)}. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Regla: desde ${cfg.discFrom} unidades hasta ${cfg.maxDiscPct}% en unidad ${cfg.discTo}.`;
 }
 
 function updateVolumeDiscountPreview(serviceKey){
@@ -1470,7 +1536,13 @@ function saveDraft(){
     selected: selectedSvcs(),
     prices: {},
     qty: {},
-    addons: {}
+    addons: {},
+    customPersonalizado: {
+      name: v('custom-name-personalizado'),
+      maxDiscPct: v('custom-maxdisc-personalizado'),
+      discFrom: v('custom-discfrom-personalizado'),
+      discTo: v('custom-discto-personalizado')
+    }
   };
 
   SERVICE_KEYS.forEach(key => {
@@ -1507,6 +1579,14 @@ function restoreDraft(){
     setExamplesEnabled(!!draft.examplesEnabled);
     setPacksEnabled(!!draft.packsEnabled);
     setMin3MonthsEnabled(draft.includeMin3Months !== false);
+    const cName = document.getElementById('custom-name-personalizado');
+    const cMax = document.getElementById('custom-maxdisc-personalizado');
+    const cFrom = document.getElementById('custom-discfrom-personalizado');
+    const cTo = document.getElementById('custom-discto-personalizado');
+    if(cName) cName.value = draft.customPersonalizado && draft.customPersonalizado.name ? draft.customPersonalizado.name : '';
+    if(cMax) cMax.value = draft.customPersonalizado && draft.customPersonalizado.maxDiscPct ? draft.customPersonalizado.maxDiscPct : '20';
+    if(cFrom) cFrom.value = draft.customPersonalizado && draft.customPersonalizado.discFrom ? draft.customPersonalizado.discFrom : '5';
+    if(cTo) cTo.value = draft.customPersonalizado && draft.customPersonalizado.discTo ? draft.customPersonalizado.discTo : '30';
     document.getElementById('examples-list').innerHTML = '';
     nextExampleId = 1;
     (Array.isArray(draft.examples) ? draft.examples : []).forEach(ex => addExampleRow(ex));
@@ -1562,6 +1642,7 @@ function formatCLPInput(input){
 function bindFormEvents(){
   const ids = [
     'f-cliente','f-nota','f-tasa','f-examples-enabled','f-packs-enabled','f-cond-min3',
+    'custom-name-personalizado','custom-maxdisc-personalizado','custom-discfrom-personalizado','custom-discto-personalizado',
     ...SERVICE_KEYS.flatMap(k => ['clp-'+k,'qty-'+k])
   ];
   ids.forEach(id => {
@@ -1639,11 +1720,13 @@ function bindFormEvents(){
     });
     clpInput.addEventListener('input', () => {
       if(key === 'multiidioma') updateMultiidiomaPreview();
+      if(key === 'personalizado') updatePersonalizadoPreview();
       if(VOLUME_DISCOUNT_SERVICES.has(key)) updateVolumeDiscountPreview(key);
     });
     clpInput.addEventListener('blur', () => {
       formatCLPInput(clpInput);
       if(key === 'multiidioma') updateMultiidiomaPreview();
+      if(key === 'personalizado') updatePersonalizadoPreview();
       if(VOLUME_DISCOUNT_SERVICES.has(key)) updateVolumeDiscountPreview(key);
       saveDraft();
     });
@@ -1651,6 +1734,7 @@ function bindFormEvents(){
     const qtyInput = document.getElementById('qty-'+key);
     qtyInput.addEventListener('input', () => {
       if(key === 'multiidioma') updateMultiidiomaPreview();
+      if(key === 'personalizado') updatePersonalizadoPreview();
       if(VOLUME_DISCOUNT_SERVICES.has(key)) updateVolumeDiscountPreview(key);
     });
     qtyInput.addEventListener('blur', () => {
@@ -1659,6 +1743,7 @@ function bindFormEvents(){
       const maxQty = getServiceMaxQty(key);
       qtyInput.value = n && n > 0 ? String(Math.min(maxQty, Math.max(n, minQty))) : '';
       if(key === 'multiidioma') updateMultiidiomaPreview();
+      if(key === 'personalizado') updatePersonalizadoPreview();
       if(VOLUME_DISCOUNT_SERVICES.has(key)) updateVolumeDiscountPreview(key);
       saveDraft();
     });
@@ -1727,8 +1812,12 @@ function buildPricingBlockFromState(state, showUSD, tasa){
     const clpNum = getServiceBaseCLP(key, clpRaw);
     const qty = Math.max(getServiceMinQty(key), parseInt(qtyRaw,10) || getServiceMinQty(key));
     const qtyLabel = key === 'multiidioma' ? 'idioma' : 'unidad';
+    const customName = key === 'personalizado' && state && state.custom && state.custom.personalizado && state.custom.personalizado.name
+      ? String(state.custom.personalizado.name).trim()
+      : '';
+    const serviceName = customName || m.name;
     const serviceDesc = escapeHTML(m.desc).replace(/\n/g,'<br>');
-    const unitAfterDiscount = clpNum ? unitPriceForService(key, clpNum, qty) : null;
+    const unitAfterDiscount = clpNum ? unitPriceForService(key, clpNum, qty, state) : null;
     const discountPct = (clpNum && unitAfterDiscount && clpNum > 0)
       ? ((clpNum - unitAfterDiscount) / clpNum) * 100
       : 0;
@@ -1828,7 +1917,7 @@ function buildPricingBlockFromState(state, showUSD, tasa){
     <div class="service-card liquid-glass">
       <div class="sc-icon">${m.icon}</div>
       <div class="sc-body">
-        <div class="sc-name">${m.name}</div>
+        <div class="sc-name">${escapeHTML(serviceName)}</div>
         <div class="sc-desc">${serviceDesc}</div>
       </div>
       ${priceHTML}
