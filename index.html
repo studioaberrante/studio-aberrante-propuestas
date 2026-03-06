@@ -1540,23 +1540,47 @@ const SERVICE_KEYS = Object.keys(SVC_META);
 const STAGE1_META = {
   clon_foto: {
     name:'Clon Digital por Foto',
-    badge:'Opción A',
-    desc:'Tu cara real. 100% remoto con modelado facial y voz sintética.'
+    badge:'OPCIÓN A — RECOMENDADA',
+    desc:'Tu cara real. 100% remoto desde Puerto Montt.',
+    bullets:[
+      'Protocolo de grabación remota guiado',
+      'Modelado facial desde tus fotografías',
+      'Ajuste y definición de tu voz sintética',
+      'Sin mantención mensual en la nube'
+    ]
   },
   clon_presencial: {
     name:'Clon Digital Presencial',
-    badge:'Opción B',
-    desc:'Mayor realismo con captura presencial de alta calidad.'
+    badge:'OPCIÓN B — MAYOR REALISMO',
+    desc:'Tu cara real. Mayor calidad si visitas Santiago.',
+    bullets:[
+      'Sesión presencial en estudio Santiago',
+      'Captura facial de alta resolución',
+      'Voz sintética de mayor fidelidad',
+      'Mantención nube $40.000/mes'
+    ]
   },
   avatar_basico: {
     name:'Avatar IA Básico',
-    badge:'Opción C',
-    desc:'Avatar creado sin usar tu imagen personal.'
+    badge:'OPCIÓN C — SIN USAR TU IMAGEN',
+    desc:'Personaje creado desde cero. Sin mantención mensual.',
+    bullets:[
+      'Personalidad y apariencia diseñadas para la marca',
+      'Voz y estilo narrativo propio',
+      'Sin uso de tu imagen personal',
+      'Sin costo de mantención en la nube'
+    ]
   },
   avatar_avanzado: {
     name:'Avatar IA Avanzado',
-    badge:'Opción D',
-    desc:'Avatar premium con mayor detalle visual y narrativo.'
+    badge:'OPCIÓN D — AVATAR PREMIUM',
+    desc:'Versión avanzada con mayor detalle visual y narrativo.',
+    bullets:[
+      'Diseño premium y look hiperrealista',
+      'Gestualidad más precisa para contenido comercial',
+      'Voz IA optimizada para campañas de venta',
+      'Sin costo de mantención en la nube'
+    ]
   }
 };
 const STAGE1_KEYS = Object.keys(STAGE1_META);
@@ -2399,33 +2423,23 @@ function buildStage1HTML(stage1, showUSD, tasa){
     if(key === 'clon_presencial' && stage1.maintOn){
       const maintLine = stage1.maintCLP * qty;
       monthlyAddonCLP += maintLine;
-      extraLine = `<div class="sc-addon">+ Mantención mensual en nube: ${fmt(maintLine)} <span>(${qty} x ${fmt(stage1.maintCLP)} mensual)</span></div>`;
+      extraLine = `<div class="stage1-extra-line">+ Mantención mensual en nube: ${fmt(maintLine)} <span>(${qty} x ${fmt(stage1.maintCLP)} mensual)</span></div>`;
     }
     const isFeatured = key === 'clon_presencial';
+    const bulletRows = (Array.isArray(meta.bullets) ? meta.bullets : [])
+      .map(text => `<li><span>✓</span>${escapeHTML(text)}</li>`)
+      .join('');
     cards += `
     <article class="stage1-card liquid-glass ${isFeatured ? 'featured' : ''}">
-      <div class="stage1-kicker">Pago único</div>
+      <div class="stage1-kicker">${escapeHTML(meta.badge || 'PAGO ÚNICO')}</div>
       <h3 class="stage1-name">${escapeHTML(meta.name)}</h3>
       <div class="stage1-price">${fmt(lineTotal)} <span>pago único</span></div>
       ${qty > 1 ? `<div class="stage1-qty">${qty} unidades · ${fmt(unitPrice)} c/u</div>` : ''}
       <p class="stage1-desc">${escapeHTML(meta.desc)}</p>
+      ${bulletRows ? `<ul class="stage1-bullets">${bulletRows}</ul>` : ''}
       ${extraLine ? `<div class="stage1-extra">${extraLine}</div>` : ''}
     </article>`;
   });
-
-  const totalOnce = selected.reduce((acc, key) => {
-    const price = (stage1.prices && stage1.prices[key]) || 0;
-    const qty = (stage1.qty && stage1.qty[key]) || 1;
-    return acc + (price * qty);
-  }, 0);
-  const totals = `
-    <div class="totals-wrap">
-      <div class="total-row total-row-secondary">
-        <div class="total-label">Etapa 1 · Pago único</div>
-        <div class="total-amount">${fmt(totalOnce)}</div>
-      </div>
-      ${monthlyAddonCLP > 0 ? `<div class="billing-note liquid-glass">Mantención mensual de clon presencial: ${fmt(monthlyAddonCLP)}. Este valor se suma al total mensual de los packs.</div>` : ''}
-    </div>`;
 
   const html = `
   <div class="services stage1-section">
@@ -2435,13 +2449,15 @@ function buildStage1HTML(stage1, showUSD, tasa){
         <div class="section-title">Creación del Clon Digital</div>
         <div class="stage1-intro">Pago único. Elige la opción que más se ajuste a tu situación.</div>
       </div>
-      <div class="section-count">Pago único</div>
     </div>
     <div class="stage1-grid">
       ${cards}
     </div>
-    ${totals}
-    <div class="billing-note liquid-glass">💡 Las opciones de Etapa 1 son de integración inicial (pago único). Los packs mensuales se calculan por separado.</div>
+    <div class="stage1-note liquid-glass">
+      <p>💡 <strong>¿Clon o Avatar?</strong> El clon usa tu cara e imagen real; el avatar es un personaje creado para proteger tu imagen personal si prefieres no mezclarla con contenido masivo.</p>
+      <p>🔁 <strong>Upgrade disponible:</strong> puedes partir con el Clon por Foto y luego pasar al presencial cuando visites Santiago, sin pagar nuevamente la integración base.</p>
+      <p>☁️ <strong>Mantención mensual en la nube:</strong> solo aplica para Clon Presencial y se agrega al total mensual cuando corresponda.</p>
+    </div>
   </div>`;
 
   return { html, monthlyAddonCLP };
@@ -2949,60 +2965,79 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,252,0.78);backdrop
 .stage1-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
+  gap:18px;
 }
 .stage1-card{
-  border-radius:22px;
-  padding:22px;
-  border:1px solid rgba(22,141,133,.18);
-  box-shadow:0 10px 22px rgba(11,15,19,.08), inset 0 1px 0 rgba(255,255,255,.45);
-  background:linear-gradient(165deg,rgba(255,255,255,.78),rgba(245,250,252,.62));
+  border-radius:40px;
+  padding:36px 38px;
+  border:1px solid rgba(22,141,133,.16);
+  box-shadow:0 14px 30px rgba(11,15,19,.08), inset 0 1px 0 rgba(255,255,255,.48);
+  background:linear-gradient(165deg,rgba(255,255,255,.8),rgba(245,250,252,.64));
 }
 .stage1-card.featured{
-  background:linear-gradient(160deg,#0d0f13,#171b21);
-  border-color:rgba(119,242,234,.28);
-  box-shadow:0 14px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+  background:linear-gradient(160deg,#0c0f14,#1a1f27);
+  border-color:rgba(119,242,234,.3);
+  box-shadow:0 20px 44px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
 }
 .stage1-kicker{
-  font-size:11px;
+  font-size:16px;
   text-transform:uppercase;
   letter-spacing:.08em;
-  font-weight:600;
+  font-weight:700;
   color:#178c85;
-  margin-bottom:10px;
+  margin-bottom:18px;
 }
 .stage1-name{
   font-family:'DM Serif Display',serif;
-  font-size:26px;
-  line-height:1.15;
+  font-size:58px;
+  line-height:1.05;
   letter-spacing:0;
-  margin-bottom:10px;
+  margin-bottom:14px;
 }
 .stage1-price{
   font-family:'DM Serif Display',serif;
-  font-size:36px;
+  font-size:66px;
   line-height:1;
-  margin-bottom:8px;
+  margin-bottom:10px;
 }
 .stage1-price span{
   font-family:'DM Sans',sans-serif;
-  font-size:12px;
-  font-weight:400;
+  font-size:18px;
+  font-weight:500;
   color:var(--mid);
-  margin-left:6px;
+  margin-left:10px;
 }
-.stage1-qty{font-size:11px;font-weight:700;color:#178c85;margin-bottom:8px;letter-spacing:.02em;text-transform:uppercase}
-.stage1-desc{font-size:12px;color:var(--mid);line-height:1.6}
+.stage1-qty{font-size:14px;font-weight:700;color:#178c85;margin-bottom:10px;letter-spacing:.03em;text-transform:uppercase}
+.stage1-desc{font-size:18px;color:var(--mid);line-height:1.58;margin-bottom:14px}
+.stage1-bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
+.stage1-bullets li{display:flex;align-items:flex-start;gap:10px;font-size:16px;line-height:1.5;color:var(--mid)}
+.stage1-bullets li span{color:#178c85;font-weight:800;line-height:1}
 .stage1-extra{margin-top:10px}
-.stage1-extra .sc-addon{margin-top:0}
+.stage1-extra-line{font-size:15px;color:var(--mid);line-height:1.5}
+.stage1-extra-line span{font-size:13px;color:var(--light)}
 .stage1-card.featured .stage1-name,
 .stage1-card.featured .stage1-price{color:#fff}
 .stage1-card.featured .stage1-kicker,
 .stage1-card.featured .stage1-qty{color:#2fd2c9}
 .stage1-card.featured .stage1-desc,
 .stage1-card.featured .stage1-price span,
-.stage1-card.featured .stage1-extra .sc-addon,
-.stage1-card.featured .stage1-extra .sc-addon span{color:rgba(238,244,250,.82)}
+.stage1-card.featured .stage1-bullets li,
+.stage1-card.featured .stage1-extra-line,
+.stage1-card.featured .stage1-extra-line span{color:rgba(238,244,250,.82)}
+.stage1-card.featured .stage1-bullets li span{color:#2fd2c9}
+.stage1-note{
+  margin-top:18px;
+  border-radius:26px;
+  border:1px solid rgba(22,141,133,.2);
+  padding:22px 24px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  font-size:16px;
+  line-height:1.6;
+  color:var(--mid);
+}
+.stage1-note strong{color:#4b4b4b}
 .packs-list{display:flex;flex-direction:column;gap:14px}
 .pack-block{
   border-radius:var(--r2);padding:0 18px 12px;border:1px solid transparent;
@@ -3291,7 +3326,13 @@ body.has-custom-bg .stage1-card{
 body.has-custom-bg .stage1-card .stage1-name,
 body.has-custom-bg .stage1-card .stage1-price{color:#fff}
 body.has-custom-bg .stage1-card .stage1-desc,
-body.has-custom-bg .stage1-card .stage1-price span{color:rgba(237,244,248,.84)}
+body.has-custom-bg .stage1-card .stage1-price span,
+body.has-custom-bg .stage1-card .stage1-bullets li,
+body.has-custom-bg .stage1-extra-line,
+body.has-custom-bg .stage1-extra-line span{color:rgba(237,244,248,.84)}
+body.has-custom-bg .stage1-card .stage1-bullets li span{color:#7ee7df}
+body.has-custom-bg .stage1-note{border-color:rgba(140,245,236,.28);color:rgba(237,244,248,.9)}
+body.has-custom-bg .stage1-note strong{color:#fff}
 body.has-custom-bg .pack-name{color:#fff}
 body.has-custom-bg .pack-subtitle{color:rgba(244,248,252,.72)}
 body.has-custom-bg .pack-meta{color:rgba(244,248,252,.78)}
@@ -3363,8 +3404,14 @@ body.has-custom-bg .sc-price-tbd{
   .welcome{padding:28px 0 8px}
   .hero{padding:20px 0 56px}
   .stage1-grid{grid-template-columns:1fr}
-  .stage1-name{font-size:24px}
-  .stage1-price{font-size:32px}
+  .stage1-card{border-radius:28px;padding:24px}
+  .stage1-kicker{font-size:12px;margin-bottom:12px}
+  .stage1-name{font-size:42px}
+  .stage1-price{font-size:48px}
+  .stage1-price span{font-size:14px}
+  .stage1-desc{font-size:16px}
+  .stage1-bullets li{font-size:15px}
+  .stage1-note{font-size:14px;padding:16px}
   .stats-grid,.conds-grid{grid-template-columns:1fr}
   .intro-card{grid-template-columns:1fr;gap:24px;padding:28px}
   .cta-card{grid-template-columns:1fr;padding:36px 28px}
