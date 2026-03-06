@@ -2693,16 +2693,22 @@ function generateProposal(opts = {}){
   let sectionCountLabel = '';
   let selectedCount = currentState.selected.filter(key => !OPTIONAL_ONLY_SERVICES.has(key)).length;
   let showMultiidiomaAddon = false;
+  const currentHasMultiidioma = currentState.selected.includes('multiidioma');
   const stage1 = collectStage1State();
   const stage1Block = buildStage1HTML(stage1, showUSD, tasa);
   const hasStage1 = stage1.selected.length > 0;
   stage1HTML = stage1Block.html;
 
   if(packsEnabled && packs.length > 0){
-    showMultiidiomaAddon = packs.some(pack => {
+    const packsHaveUGC = packs.some(pack => {
       const selected = Array.isArray(pack && pack.state && pack.state.selected) ? pack.state.selected : [];
       return selected.some(key => UGC_BASE_SERVICES.has(key));
     });
+    const packsHaveMultiidioma = packs.some(pack => {
+      const selected = Array.isArray(pack && pack.state && pack.state.selected) ? pack.state.selected : [];
+      return selected.includes('multiidioma');
+    });
+    showMultiidiomaAddon = packsHaveUGC || packsHaveMultiidioma || currentHasMultiidioma;
     const packBlocks = packs.map((pack, idx) => {
       const data = buildPricingBlockFromState(pack.state, showUSD, tasa, stage1Block.monthlyAddonCLP);
       const pname = escapeHTML((pack.name || `Pack ${idx + 1}`).trim());
@@ -2776,8 +2782,9 @@ function generateProposal(opts = {}){
     selectedCount = packs.length + stage1.selected.length;
   } else {
     const mainSelected = currentState.selected.filter(key => !OPTIONAL_ONLY_SERVICES.has(key));
-    showMultiidiomaAddon = mainSelected.some(key => UGC_BASE_SERVICES.has(key));
-    if(!mainSelected.length && !hasStage1){
+    const mainHasUGC = mainSelected.some(key => UGC_BASE_SERVICES.has(key));
+    showMultiidiomaAddon = mainHasUGC || currentHasMultiidioma;
+    if(!mainSelected.length && !hasStage1 && !showMultiidiomaAddon){
       if(!auto){
         alert('Seleccioná al menos un servicio antes de generar la propuesta.');
       } else if(!silent){
