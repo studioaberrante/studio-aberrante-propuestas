@@ -464,13 +464,26 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
           <div class="svc-card" id="svc-podcast">
             <div class="svc-card-top" onclick="toggleSvc('podcast')">
               <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
-              <div class="svc-name">Podcast IA</div>
+              <div class="svc-name">Video Podcast IA Instagram (hasta 1:30 min)</div>
               <span class="svc-tag tag-price">Con precio</span>
             </div>
             <div class="svc-fields">
-              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-podcast" placeholder="ej. 300.000"></div>
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-podcast" value="55.000" placeholder="55.000"></div>
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-podcast" placeholder="1" min="1"></div>
-              <div class="svc-inline-note" id="podcast-discount-note">Descuento por volumen (podcast): hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).</div>
+              <div class="svc-inline-note" id="podcast-discount-note">Precio base: $55.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$55.000 | 8=>$54.000 | 12=>$53.000 | 16=>$51.000 | 20=>$49.000 | 24=>$48.000 | 28=>$47.000 | 32=>$46.750.</div>
+            </div>
+          </div>
+
+          <div class="svc-card" id="svc-podcast_youtube">
+            <div class="svc-card-top" onclick="toggleSvc('podcast_youtube')">
+              <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+              <div class="svc-name">Video Podcast IA YouTube (1:30 a 3:00 min)</div>
+              <span class="svc-tag tag-price">Con precio</span>
+            </div>
+            <div class="svc-fields">
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-podcast_youtube" value="120.000" placeholder="120.000"></div>
+              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-podcast_youtube" placeholder="1" min="1"></div>
+              <div class="svc-inline-note" id="podcast_youtube-discount-note">Precio base: $120.000 CLP (sin IVA). Escala por volumen (tope 15%): 2=>$120.000 | 4=>$117.000 | 6=>$114.000 | 8=>$110.000 | 10=>$106.000 | 12=>$102.000.</div>
             </div>
           </div>
 
@@ -563,26 +576,26 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
           <div class="svc-card" id="svc-ugc">
             <div class="svc-card-top" onclick="toggleSvc('ugc')">
               <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
-              <div class="svc-name">UGC Videos para Ads (15 seg)</div>
-              <span class="svc-tag tag-noprice">A cotizar</span>
+              <div class="svc-name">UGC Ads IA (hasta 15 segundos)</div>
+              <span class="svc-tag tag-price">Con precio</span>
             </div>
             <div class="svc-fields">
-              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc" placeholder="A definir"></div>
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc" value="45.000" placeholder="45.000"></div>
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc" placeholder="1" min="1"></div>
-              <div class="svc-inline-note" id="ugc-discount-note">Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 26,25% de descuento en la unidad 32 (tope máximo).</div>
+              <div class="svc-inline-note" id="ugc-discount-note">Precio base: $45.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$45.000 | 8=>$44.000 | 12=>$43.000 | 16=>$42.000 | 20=>$41.000 | 24=>$40.000 | 28=>$39.000 | 32=>$38.250.</div>
             </div>
           </div>
 
           <div class="svc-card" id="svc-ugc_realista30">
             <div class="svc-card-top" onclick="toggleSvc('ugc_realista30')">
               <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
-              <div class="svc-name">UGC Videos Realistas (30 seg)</div>
+              <div class="svc-name">UGC Realista IA (hasta 30 segundos)</div>
               <span class="svc-tag tag-price">Con precio</span>
             </div>
             <div class="svc-fields">
               <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc_realista30" value="80.000" placeholder="80.000"></div>
               <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc_realista30" placeholder="1" min="1"></div>
-              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 24% en la unidad 32 (tope máximo).</div>
+              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base: $80.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$80.000 | 8=>$79.000 | 12=>$78.000 | 16=>$76.000 | 20=>$74.000 | 24=>$72.000 | 28=>$70.000 | 32=>$68.000.</div>
             </div>
           </div>
 
@@ -899,7 +912,7 @@ const SERVICE_ADDON_DEFS = [
     emoji:'📸',
     desc:'Fotos extra para complementar podcast y UGC en feed y piezas comerciales.',
     unitText:'por fotografía',
-    baseServices:['podcast','ugc','ugc_realista30'],
+    baseServices:['podcast','podcast_youtube','ugc','ugc_realista30'],
     defaultPct:12
   },
   {
@@ -908,7 +921,7 @@ const SERVICE_ADDON_DEFS = [
     emoji:'🎙️',
     desc:'Unidad adicional de podcast con la misma línea creativa del pack.',
     unitText:'por video',
-    baseServices:['podcast'],
+    baseServices:['podcast','podcast_youtube'],
     defaultPct:100
   },
   {
@@ -926,7 +939,7 @@ const SERVICE_ADDON_DEFS = [
     emoji:'📝',
     desc:'Versión subtitulada optimizada para pauta y consumo sin audio.',
     unitText:'por video',
-    baseServices:['podcast','ugc','ugc_realista30','cortometraje'],
+    baseServices:['podcast','podcast_youtube','ugc','ugc_realista30','cortometraje'],
     defaultPct:18
   }
 ];
@@ -1211,6 +1224,7 @@ function applyServiceState(state){
   if(customFrom) customFrom.value = savedCustom.discFrom || '5';
   if(customTo) customTo.value = savedCustom.discTo || '30';
   updateVolumeDiscountPreview('podcast');
+  updateVolumeDiscountPreview('podcast_youtube');
   updateVolumeDiscountPreview('cortometraje');
   updateVolumeDiscountPreview('fotografia');
   updateVolumeDiscountPreview('ugc');
@@ -1520,14 +1534,15 @@ function fmtCLP(n){
 const SVC_META = {
   audiovisual:{ name:'Contenido Audiovisual IA', icon:'🎬', desc:'Videos, reels, teasers y piezas audiovisuales generadas 100% con inteligencia artificial. Velocidad, escala y calidad sin producción tradicional.' },
   cortometraje:{ name:'Cortometrajes IA', icon:'🎥', desc:'Producción de cortometrajes narrativos generados con IA. Guion, visuales, voz y montaje con tecnología de última generación.' },
-  podcast:{ name:'Podcast IA', icon:'🎙️', desc:'Producción completa de podcast con locución, música y edición generada por IA. Contenido consistente sin necesidad de grabación.' },
+  podcast:{ name:'Video Podcast IA Instagram (hasta 1:30 min)', icon:'🎙️', desc:'Video podcast corto optimizado para Instagram y pauta. Producción con IA, guion y edición para performance.' },
+  podcast_youtube:{ name:'Video Podcast IA YouTube (1:30 a 3:00 min)', icon:'📺', desc:'Video podcast extendido para YouTube con mayor desarrollo narrativo y retención, producido con IA.' },
   fotografia:{ name:'Fotografía Generada con IA', icon:'📸', desc:'Imágenes fotorrealistas de personas, productos, espacios y conceptos. Sin cámara, sin locación, sin límites creativos.' },
   campania:{ name:'Campañas Publicitarias IA', icon:'📣', desc:'Estrategia y producción completa de campañas publicitarias con assets generados por IA: gráficas, videos, copy y segmentación.' },
   consultoria:{ name:'Consultoría para Empresas', icon:'💼', desc:'Acompañamiento estratégico para integrar IA en los procesos de comunicación, marketing y producción de contenido de tu empresa.' },
   asesoria:{ name:'Asesoría Creativa Estratégica', icon:'🧠', desc:'Servicio de dirección creativa mensual: ideas, guiones, enfoque editorial y optimización estratégica para mejorar resultados del contenido.' },
   personalizado:{ name:'Servicio personalizado', icon:'🧩', desc:'Servicio definido a medida según la reunión con el cliente. Nombre, precio y lógica de descuento configurables por propuesta.' },
-  ugc:{ name:'UGC Videos para Ads (15 seg)', icon:'📱', desc:'Videos estilo UGC de 15 segundos producidos con IA para campañas de performance. Alta conversión, bajo costo.' },
-  ugc_realista30:{ name:'UGC Videos Realistas (30 seg)', icon:'🎬', desc:'Videos UGC realistas de 30 segundos producidos con IA. Precio base por unidad y descuento progresivo por volumen desde la unidad 12.' },
+  ugc:{ name:'UGC Ads IA (hasta 15 segundos)', icon:'📱', desc:'UGC para anuncios de respuesta directa. Valor unitario optimizado por volumen. Precios netos sin IVA.' },
+  ugc_realista30:{ name:'UGC Realista IA (hasta 30 segundos)', icon:'🎬', desc:'UGC realista para campañas con mayor storytelling. Valor unitario optimizado por volumen. Precios netos sin IVA.' },
   multiidioma:{ name:'Pack Multiidioma — Doblaje + Subtítulos IA', icon:'🌐', desc:'Doblaje con lip-sync IA + subtítulos adaptados por idioma. Add-on sobre cualquier pack UGC. Valores netos sin IVA.' },
   canciones:{ name:'Canciones Personalizadas', icon:'🎵', desc:'Composición y producción de canciones originales con voz e instrumentación generada por IA.' },
   visuales:{ name:'Visuales para Fiestas y Eventos', icon:'✨', desc:'Contenido visual inmersivo para pantallas en fiestas, eventos y activaciones: loops, VJ sets y ambientaciones.' },
@@ -1584,7 +1599,7 @@ const STAGE1_META = {
   }
 };
 const STAGE1_KEYS = Object.keys(STAGE1_META);
-const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','cortometraje','fotografia','ugc','ugc_realista30','ecommerce']);
+const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','podcast_youtube','cortometraje','fotografia','ugc','ugc_realista30','ecommerce']);
 const SERVICE_MIN_QTY = {
   ugc_realista30: 1,
   multiidioma: 1
@@ -1593,32 +1608,93 @@ const SERVICE_MAX_QTY = {
   multiidioma: 3
 };
 const SERVICE_DEFAULT_BASE_CLP = {
+  ugc: 45000,
   ugc_realista30: 80000,
+  podcast: 55000,
+  podcast_youtube: 120000,
   multiidioma: 6000
 };
 const SERVICE_DISCOUNT_RULES = {
-  ugc: { maxDiscountPct: 26.25, fixedUntil: 4, fullDiscountAt: 32 },
-  ugc_realista30: { maxDiscountPct: 24, fixedUntil: 11, fullDiscountAt: 32 }
+  ugc: { maxDiscountPct: 15, fixedUntil: 4, fullDiscountAt: 32 },
+  ugc_realista30: { maxDiscountPct: 15, fixedUntil: 4, fullDiscountAt: 32 },
+  podcast: { maxDiscountPct: 15, fixedUntil: 4, fullDiscountAt: 32 },
+  podcast_youtube: { maxDiscountPct: 15, fixedUntil: 2, fullDiscountAt: 12 }
 };
 const SERVICE_TIER_DISCOUNT_RULES = {
+  podcast: [
+    { minQty: 8, pct: 1.8 },
+    { minQty: 12, pct: 3.6 },
+    { minQty: 16, pct: 7.3 },
+    { minQty: 20, pct: 10.9 },
+    { minQty: 24, pct: 12.7 },
+    { minQty: 28, pct: 14.5 },
+    { minQty: 32, pct: 15 }
+  ],
   ugc: [
-    { minQty: 12, pct: 5 },
-    { minQty: 16, pct: 10 },
-    { minQty: 20, pct: 15 },
-    { minQty: 24, pct: 18.75 },
-    { minQty: 28, pct: 22.5 },
-    { minQty: 32, pct: 26.25 }
+    { minQty: 8, pct: 2.2 },
+    { minQty: 12, pct: 4.4 },
+    { minQty: 16, pct: 6.7 },
+    { minQty: 20, pct: 8.9 },
+    { minQty: 24, pct: 11.1 },
+    { minQty: 28, pct: 13.3 },
+    { minQty: 32, pct: 15 }
   ],
   ugc_realista30: [
-    { minQty: 12, pct: 5 },
-    { minQty: 16, pct: 10 },
-    { minQty: 20, pct: 15 },
-    { minQty: 24, pct: 18 },
-    { minQty: 28, pct: 21 },
-    { minQty: 32, pct: 24 }
+    { minQty: 8, pct: 1.3 },
+    { minQty: 12, pct: 2.5 },
+    { minQty: 16, pct: 5 },
+    { minQty: 20, pct: 7.5 },
+    { minQty: 24, pct: 10 },
+    { minQty: 28, pct: 12.5 },
+    { minQty: 32, pct: 15 }
+  ],
+  podcast_youtube: [
+    { minQty: 4, pct: 2.5 },
+    { minQty: 6, pct: 5 },
+    { minQty: 8, pct: 8.3 },
+    { minQty: 10, pct: 11.7 },
+    { minQty: 12, pct: 15 }
   ]
 };
 const SERVICE_TIER_UNIT_PRICE = {
+  ugc: {
+    4: 45000,
+    8: 44000,
+    12: 43000,
+    16: 42000,
+    20: 41000,
+    24: 40000,
+    28: 39000,
+    32: 38250
+  },
+  ugc_realista30: {
+    4: 80000,
+    8: 79000,
+    12: 78000,
+    16: 76000,
+    20: 74000,
+    24: 72000,
+    28: 70000,
+    32: 68000
+  },
+  podcast: {
+    4: 55000,
+    8: 54000,
+    12: 53000,
+    16: 51000,
+    20: 49000,
+    24: 48000,
+    28: 47000,
+    32: 46750
+  },
+  podcast_youtube: {
+    2: 120000,
+    4: 117000,
+    6: 114000,
+    8: 110000,
+    10: 106000,
+    12: 102000
+  },
   multiidioma: {
     1: 7000,
     2: 6500,
@@ -1678,7 +1754,13 @@ function getTierUnitPrice(serviceKey, qty){
   const tiers = SERVICE_TIER_UNIT_PRICE[serviceKey];
   if(!tiers) return null;
   const q = Math.max(getServiceMinQty(serviceKey), Math.min(getServiceMaxQty(serviceKey), qty || 1));
-  return tiers[q] || null;
+  if(tiers[q]) return tiers[q];
+  const tierKeys = Object.keys(tiers).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+  let chosen = null;
+  tierKeys.forEach(k => {
+    if(q >= k) chosen = k;
+  });
+  return chosen !== null ? tiers[chosen] : null;
 }
 
 function getPersonalizadoConfig(state){
@@ -1693,11 +1775,17 @@ function getPersonalizadoConfig(state){
 }
 
 function defaultDiscountNote(serviceKey){
+  if(serviceKey === 'podcast_youtube'){
+    return 'Precio base: $120.000 CLP (sin IVA). Escala por volumen (tope 15%): 2=>$120.000 | 4=>$117.000 | 6=>$114.000 | 8=>$110.000 | 10=>$106.000 | 12=>$102.000.';
+  }
+  if(serviceKey === 'podcast'){
+    return 'Precio base: $55.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$55.000 | 8=>$54.000 | 12=>$53.000 | 16=>$51.000 | 20=>$49.000 | 24=>$48.000 | 28=>$47.000 | 32=>$46.750.';
+  }
   if(serviceKey === 'ugc_realista30'){
-    return 'Precio base: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento por tramos: 12=>5% | 16=>10% | 20=>15% | 24=>18% | 28=>21% | 32=>24% (tope).';
+    return 'Precio base: $80.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$80.000 | 8=>$79.000 | 12=>$78.000 | 16=>$76.000 | 20=>$74.000 | 24=>$72.000 | 28=>$70.000 | 32=>$68.000.';
   }
   if(serviceKey === 'ugc'){
-    return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 26,25% de descuento en la unidad 32 (tope máximo).';
+    return 'Precio base: $45.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$45.000 | 8=>$44.000 | 12=>$43.000 | 16=>$42.000 | 20=>$41.000 | 24=>$40.000 | 28=>$39.000 | 32=>$38.250.';
   }
   return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).';
 }
@@ -1770,10 +1858,16 @@ function updateVolumeDiscountPreview(serviceKey){
   const pct = base > 0 ? (unitDiff / base) * 100 : 0;
   const tierPct = getTierDiscountPct(serviceKey, qty);
   if(tierPct !== null){
-    const scaleText = serviceKey === 'ugc_realista30'
-      ? '12=>5% | 16=>10% | 20=>15% | 24=>18% | 28=>21% | 32=>24% (tope)'
-      : '12=>5% | 16=>10% | 20=>15% | 24=>18,75% | 28=>22,5% | 32=>26,25% (tope)';
-    note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Escala UGC: ${scaleText}. Valores netos sin IVA.`;
+    const scaleText = serviceKey === 'ugc'
+      ? '4=>$45.000 | 8=>$44.000 | 12=>$43.000 | 16=>$42.000 | 20=>$41.000 | 24=>$40.000 | 28=>$39.000 | 32=>$38.250'
+      : serviceKey === 'ugc_realista30'
+        ? '4=>$80.000 | 8=>$79.000 | 12=>$78.000 | 16=>$76.000 | 20=>$74.000 | 24=>$72.000 | 28=>$70.000 | 32=>$68.000'
+        : serviceKey === 'podcast'
+          ? '4=>$55.000 | 8=>$54.000 | 12=>$53.000 | 16=>$51.000 | 20=>$49.000 | 24=>$48.000 | 28=>$47.000 | 32=>$46.750'
+          : serviceKey === 'podcast_youtube'
+            ? '2=>$120.000 | 4=>$117.000 | 6=>$114.000 | 8=>$110.000 | 10=>$106.000 | 12=>$102.000'
+            : `${getServiceDiscountRule(serviceKey).fixedUntil + 1}+`;
+    note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Escala por volumen: ${scaleText}. Valores netos sin IVA.`;
     return;
   }
   const rule = getServiceDiscountRule(serviceKey);
@@ -2183,6 +2277,7 @@ restoreDraft();
 syncOverlayLabel();
 setVisualStep(visualStepOpen);
 updateVolumeDiscountPreview('podcast');
+updateVolumeDiscountPreview('podcast_youtube');
 updateVolumeDiscountPreview('cortometraje');
 updateVolumeDiscountPreview('fotografia');
 updateVolumeDiscountPreview('ugc');
