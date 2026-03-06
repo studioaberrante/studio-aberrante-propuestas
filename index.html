@@ -1533,7 +1533,7 @@ function fmtCLP(n){
 // ─── SERVICE META ─────────────────────────────────────────
 const SVC_META = {
   audiovisual:{ name:'Contenido Audiovisual IA', icon:'🎬', desc:'Videos, reels, teasers y piezas audiovisuales generadas 100% con inteligencia artificial. Velocidad, escala y calidad sin producción tradicional.' },
-  cortometraje:{ name:'Cortometrajes IA', icon:'🎥', desc:'Producción de cortometrajes narrativos generados con IA. Guion, visuales, voz y montaje con tecnología de última generación.' },
+  cortometraje:{ name:'Reels IA', icon:'🎥', desc:'Reels generados con IA para contenido orgánico y performance. Precio base manual y descuento automático por volumen.' },
   podcast:{ name:'Video Podcast IA Instagram (hasta 1:30 min)', icon:'🎙️', desc:'Video podcast corto optimizado para Instagram y pauta. Producción con IA, guion y edición para performance.' },
   podcast_youtube:{ name:'Video Podcast IA YouTube (1:30 a 3:00 min)', icon:'📺', desc:'Video podcast extendido para YouTube con mayor desarrollo narrativo y retención, producido con IA.' },
   fotografia:{ name:'Fotografía Generada con IA', icon:'📸', desc:'Imágenes fotorrealistas de personas, productos, espacios y conceptos. Sin cámara, sin locación, sin límites creativos.' },
@@ -1599,7 +1599,7 @@ const STAGE1_META = {
   }
 };
 const STAGE1_KEYS = Object.keys(STAGE1_META);
-const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','podcast_youtube','cortometraje','fotografia','ugc','ugc_realista30','ecommerce']);
+const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','podcast_youtube','cortometraje','fotografia','ugc','ugc_realista30']);
 const SERVICE_MIN_QTY = {
   ugc_realista30: 1,
   multiidioma: 1
@@ -1608,93 +1608,66 @@ const SERVICE_MAX_QTY = {
   multiidioma: 3
 };
 const SERVICE_DEFAULT_BASE_CLP = {
-  ugc: 45000,
-  ugc_realista30: 80000,
-  podcast: 55000,
-  podcast_youtube: 120000,
   multiidioma: 6000
 };
-const SERVICE_DISCOUNT_RULES = {
-  ugc: { maxDiscountPct: 15, fixedUntil: 4, fullDiscountAt: 32 },
-  ugc_realista30: { maxDiscountPct: 15, fixedUntil: 4, fullDiscountAt: 32 },
-  podcast: { maxDiscountPct: 15, fixedUntil: 4, fullDiscountAt: 32 },
-  podcast_youtube: { maxDiscountPct: 15, fixedUntil: 2, fullDiscountAt: 12 }
-};
+const GLOBAL_MAX_DISCOUNT_PCT = 37.5;
+const GLOBAL_MIN_PRICE_FACTOR = 0.625;
 const SERVICE_TIER_DISCOUNT_RULES = {
+  cortometraje: [
+    { minQty: 5, pct: 3.1 },
+    { minQty: 7, pct: 4.6 },
+    { minQty: 9, pct: 7.7 },
+    { minQty: 11, pct: 10.8 },
+    { minQty: 13, pct: 12.3 },
+    { minQty: 17, pct: 13.8 },
+    { minQty: 21, pct: 14.6 },
+    { minQty: 25, pct: 15.0 }
+  ],
   podcast: [
-    { minQty: 8, pct: 1.8 },
-    { minQty: 12, pct: 3.6 },
-    { minQty: 16, pct: 7.3 },
-    { minQty: 20, pct: 10.9 },
-    { minQty: 24, pct: 12.7 },
-    { minQty: 28, pct: 14.5 },
-    { minQty: 32, pct: 15 }
+    { minQty: 5, pct: 2.2 },
+    { minQty: 9, pct: 4.4 },
+    { minQty: 13, pct: 6.7 },
+    { minQty: 17, pct: 8.9 },
+    { minQty: 21, pct: 11.1 },
+    { minQty: 25, pct: 13.3 },
+    { minQty: 29, pct: 15.0 }
   ],
   ugc: [
-    { minQty: 8, pct: 2.2 },
-    { minQty: 12, pct: 4.4 },
-    { minQty: 16, pct: 6.7 },
-    { minQty: 20, pct: 8.9 },
-    { minQty: 24, pct: 11.1 },
-    { minQty: 28, pct: 13.3 },
-    { minQty: 32, pct: 15 }
+    { minQty: 5, pct: 2.2 },
+    { minQty: 9, pct: 4.4 },
+    { minQty: 13, pct: 6.7 },
+    { minQty: 17, pct: 8.9 },
+    { minQty: 21, pct: 11.1 },
+    { minQty: 25, pct: 13.3 },
+    { minQty: 29, pct: 15.0 }
   ],
   ugc_realista30: [
-    { minQty: 8, pct: 1.3 },
-    { minQty: 12, pct: 2.5 },
-    { minQty: 16, pct: 5 },
-    { minQty: 20, pct: 7.5 },
-    { minQty: 24, pct: 10 },
-    { minQty: 28, pct: 12.5 },
-    { minQty: 32, pct: 15 }
+    { minQty: 5, pct: 1.3 },
+    { minQty: 9, pct: 2.5 },
+    { minQty: 13, pct: 5.0 },
+    { minQty: 17, pct: 7.5 },
+    { minQty: 21, pct: 10.0 },
+    { minQty: 25, pct: 12.5 },
+    { minQty: 29, pct: 15.0 }
   ],
   podcast_youtube: [
-    { minQty: 4, pct: 2.5 },
-    { minQty: 6, pct: 5 },
-    { minQty: 8, pct: 8.3 },
-    { minQty: 10, pct: 11.7 },
-    { minQty: 12, pct: 15 }
+    { minQty: 3, pct: 3.0 },
+    { minQty: 5, pct: 6.0 },
+    { minQty: 7, pct: 9.0 },
+    { minQty: 9, pct: 12.0 },
+    { minQty: 11, pct: 14.0 },
+    { minQty: 13, pct: 15.0 }
+  ],
+  fotografia: [
+    { minQty: 5, pct: 6.3 },
+    { minQty: 9, pct: 12.5 },
+    { minQty: 13, pct: 18.8 },
+    { minQty: 17, pct: 25.0 },
+    { minQty: 25, pct: 31.3 },
+    { minQty: 33, pct: 37.5 }
   ]
 };
 const SERVICE_TIER_UNIT_PRICE = {
-  ugc: {
-    4: 45000,
-    8: 44000,
-    12: 43000,
-    16: 42000,
-    20: 41000,
-    24: 40000,
-    28: 39000,
-    32: 38250
-  },
-  ugc_realista30: {
-    4: 80000,
-    8: 79000,
-    12: 78000,
-    16: 76000,
-    20: 74000,
-    24: 72000,
-    28: 70000,
-    32: 68000
-  },
-  podcast: {
-    4: 55000,
-    8: 54000,
-    12: 53000,
-    16: 51000,
-    20: 49000,
-    24: 48000,
-    28: 47000,
-    32: 46750
-  },
-  podcast_youtube: {
-    2: 120000,
-    4: 117000,
-    6: 114000,
-    8: 110000,
-    10: 106000,
-    12: 102000
-  },
   multiidioma: {
     1: 7000,
     2: 6500,
@@ -1730,14 +1703,8 @@ function getServiceMaxQty(serviceKey){
 
 function getServiceBaseCLP(serviceKey, rawValue){
   const parsed = parseCLP(rawValue);
-  if(parsed) return parsed;
+  if(parsed !== null) return parsed;
   return SERVICE_DEFAULT_BASE_CLP[serviceKey] || null;
-}
-
-function getServiceDiscountRule(serviceKey){
-  const custom = SERVICE_DISCOUNT_RULES[serviceKey];
-  if(custom) return custom;
-  return { maxDiscountPct: 30, fixedUntil: 4, fullDiscountAt: 30 };
 }
 
 function getTierDiscountPct(serviceKey, qty){
@@ -1775,19 +1742,25 @@ function getPersonalizadoConfig(state){
 }
 
 function defaultDiscountNote(serviceKey){
-  if(serviceKey === 'podcast_youtube'){
-    return 'Precio base: $120.000 CLP (sin IVA). Escala por volumen (tope 15%): 2=>$120.000 | 4=>$117.000 | 6=>$114.000 | 8=>$110.000 | 10=>$106.000 | 12=>$102.000.';
+  if(serviceKey === 'cortometraje'){
+    return 'Reels IA: 1-4=>0% | 5-6=>3.1% | 7-8=>4.6% | 9-10=>7.7% | 11-12=>10.8% | 13-16=>12.3% | 17-20=>13.8% | 21-24=>14.6% | 25-32=>15%.';
   }
   if(serviceKey === 'podcast'){
-    return 'Precio base: $55.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$55.000 | 8=>$54.000 | 12=>$53.000 | 16=>$51.000 | 20=>$49.000 | 24=>$48.000 | 28=>$47.000 | 32=>$46.750.';
+    return 'Podcast IA Instagram: 1-4=>0% | 5-8=>2.2% | 9-12=>4.4% | 13-16=>6.7% | 17-20=>8.9% | 21-24=>11.1% | 25-28=>13.3% | 29-32=>15%.';
   }
-  if(serviceKey === 'ugc_realista30'){
-    return 'Precio base: $80.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$80.000 | 8=>$79.000 | 12=>$78.000 | 16=>$76.000 | 20=>$74.000 | 24=>$72.000 | 28=>$70.000 | 32=>$68.000.';
+  if(serviceKey === 'podcast_youtube'){
+    return 'Podcast IA YouTube: 1-2=>0% | 3-4=>3% | 5-6=>6% | 7-8=>9% | 9-10=>12% | 11-12=>14% | 13-16=>15%.';
   }
   if(serviceKey === 'ugc'){
-    return 'Precio base: $45.000 CLP (sin IVA). Escala por volumen (tope 15%): 4=>$45.000 | 8=>$44.000 | 12=>$43.000 | 16=>$42.000 | 20=>$41.000 | 24=>$40.000 | 28=>$39.000 | 32=>$38.250.';
+    return 'UGC Ads IA: 1-4=>0% | 5-8=>2.2% | 9-12=>4.4% | 13-16=>6.7% | 17-20=>8.9% | 21-24=>11.1% | 25-28=>13.3% | 29-32=>15%.';
   }
-  return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 30% de descuento en la unidad 30 (tope máximo).';
+  if(serviceKey === 'ugc_realista30'){
+    return 'UGC Realista IA: 1-4=>0% | 5-8=>1.3% | 9-12=>2.5% | 13-16=>5% | 17-20=>7.5% | 21-24=>10% | 25-28=>12.5% | 29-32=>15%.';
+  }
+  if(serviceKey === 'fotografia'){
+    return 'Fotografías IA: 1-4=>0% | 5-8=>6.3% | 9-12=>12.5% | 13-16=>18.8% | 17-24=>25% | 25-32=>31.3% | 33-48=>37.5%.';
+  }
+  return 'Ingresá precio base y cantidad. El sistema aplica descuento automático por volumen y respeta tope global 37.5%. Si cantidad=0, el servicio no aparece.';
 }
 
 function unitPriceForService(serviceKey, baseUnitPrice, qty, state){
@@ -1795,17 +1768,19 @@ function unitPriceForService(serviceKey, baseUnitPrice, qty, state){
     const cfg = getPersonalizadoConfig(state);
     return calcUnitPriceLinear(baseUnitPrice, qty, cfg.maxDiscPct, cfg.discFrom - 1, cfg.discTo);
   }
+  if(serviceKey === 'asesoria'){
+    return baseUnitPrice;
+  }
   const tierUnit = getTierUnitPrice(serviceKey, Math.max(1, qty || 1));
   if(tierUnit !== null){
     return tierUnit;
   }
   const tierPct = getTierDiscountPct(serviceKey, Math.max(1, qty || 1));
   if(tierPct !== null){
-    return baseUnitPrice * (1 - (tierPct / 100));
-  }
-  if(VOLUME_DISCOUNT_SERVICES.has(serviceKey)){
-    const rule = getServiceDiscountRule(serviceKey);
-    return calcUnitPriceLinear(baseUnitPrice, qty, rule.maxDiscountPct, rule.fixedUntil, rule.fullDiscountAt);
+    const boundedPct = Math.max(0, Math.min(GLOBAL_MAX_DISCOUNT_PCT, tierPct));
+    const floor = baseUnitPrice * GLOBAL_MIN_PRICE_FACTOR;
+    const byDiscount = baseUnitPrice * (1 - (boundedPct / 100));
+    return Math.max(floor, byDiscount);
   }
   return baseUnitPrice;
 }
@@ -1845,11 +1820,16 @@ function updateVolumeDiscountPreview(serviceKey){
   const note = document.getElementById(`${serviceKey}-discount-note`);
   if(!note) return;
   const base = getServiceBaseCLP(serviceKey, v(`clp-${serviceKey}`));
-  const minQty = getServiceMinQty(serviceKey);
-  const qty = Math.max(minQty, parseInt(v(`qty-${serviceKey}`), 10) || minQty);
+  const rawQty = parseInt(v(`qty-${serviceKey}`), 10);
+  const qty = Number.isFinite(rawQty) ? Math.max(0, rawQty) : 0;
 
   if(!base){
     note.textContent = defaultDiscountNote(serviceKey);
+    return;
+  }
+
+  if(qty <= 0){
+    note.textContent = `Cantidad 0: este servicio no se incluirá en la propuesta final. ${defaultDiscountNote(serviceKey)}`;
     return;
   }
 
@@ -1858,21 +1838,10 @@ function updateVolumeDiscountPreview(serviceKey){
   const pct = base > 0 ? (unitDiff / base) * 100 : 0;
   const tierPct = getTierDiscountPct(serviceKey, qty);
   if(tierPct !== null){
-    const scaleText = serviceKey === 'ugc'
-      ? '4=>$45.000 | 8=>$44.000 | 12=>$43.000 | 16=>$42.000 | 20=>$41.000 | 24=>$40.000 | 28=>$39.000 | 32=>$38.250'
-      : serviceKey === 'ugc_realista30'
-        ? '4=>$80.000 | 8=>$79.000 | 12=>$78.000 | 16=>$76.000 | 20=>$74.000 | 24=>$72.000 | 28=>$70.000 | 32=>$68.000'
-        : serviceKey === 'podcast'
-          ? '4=>$55.000 | 8=>$54.000 | 12=>$53.000 | 16=>$51.000 | 20=>$49.000 | 24=>$48.000 | 28=>$47.000 | 32=>$46.750'
-          : serviceKey === 'podcast_youtube'
-            ? '2=>$120.000 | 4=>$117.000 | 6=>$114.000 | 8=>$110.000 | 10=>$106.000 | 12=>$102.000'
-            : `${getServiceDiscountRule(serviceKey).fixedUntil + 1}+`;
-    note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Escala por volumen: ${scaleText}. Valores netos sin IVA.`;
+    note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. ${defaultDiscountNote(serviceKey)} Valores netos sin IVA.`;
     return;
   }
-  const rule = getServiceDiscountRule(serviceKey);
-  const startDiscountAt = rule.fixedUntil + 1;
-  note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. Descuento desde ${startDiscountAt} unidades. Tope máximo: ${rule.maxDiscountPct}%. Valores netos sin IVA.`;
+  note.textContent = `Precio unitario aplicado: $${fmtCLP(unitApplied)} CLP. Base ingresada: $${fmtCLP(base)} CLP. Cantidad: ${qty}. Descuento actual: ${pct.toFixed(2)}%. ${defaultDiscountNote(serviceKey)} Valores netos sin IVA.`;
 }
 
 function addonDefs(serviceKey){
@@ -2200,7 +2169,15 @@ function bindFormEvents(){
       const n = parseInt(qtyInput.value, 10);
       const minQty = getServiceMinQty(key);
       const maxQty = getServiceMaxQty(key);
-      qtyInput.value = n && n > 0 ? String(Math.min(maxQty, Math.max(n, minQty))) : '';
+      if(Number.isFinite(n)){
+        if(key === 'multiidioma'){
+          qtyInput.value = String(Math.min(maxQty, Math.max(n, minQty)));
+        } else {
+          qtyInput.value = String(Math.max(0, Math.min(maxQty, n)));
+        }
+      } else {
+        qtyInput.value = '';
+      }
       if(key === 'multiidioma') updateMultiidiomaPreview();
       if(key === 'personalizado') updatePersonalizadoPreview();
       if(VOLUME_DISCOUNT_SERVICES.has(key)) updateVolumeDiscountPreview(key);
@@ -2295,6 +2272,7 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
   const proposalSvcs = svcs.filter(key => !OPTIONAL_ONLY_SERVICES.has(key));
   let cards = '';
   const items = [];
+  let renderedCount = 0;
   let monthlyTotalCLP = 0;
   let oneTimeTotalCLP = 0;
   let hasMonthlyTotal = false;
@@ -2307,14 +2285,18 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
     const clpRaw = state && state.prices ? state.prices[key] : '';
     const qtyRaw = state && state.qty ? state.qty[key] : '';
     const clpNum = getServiceBaseCLP(key, clpRaw);
-    const qty = Math.max(getServiceMinQty(key), parseInt(qtyRaw,10) || getServiceMinQty(key));
+    const parsedQty = parseInt(qtyRaw,10);
+    const qty = Number.isFinite(parsedQty) ? Math.max(0, parsedQty) : 0;
+    if(qty <= 0) return;
+    renderedCount += 1;
     const qtyLabel = key === 'multiidioma' ? 'idioma' : 'unidad';
     const customName = key === 'personalizado' && state && state.custom && state.custom.personalizado && state.custom.personalizado.name
       ? String(state.custom.personalizado.name).trim()
       : '';
     const serviceName = customName || m.name;
     const serviceDesc = escapeHTML(m.desc).replace(/\n/g,'<br>');
-    const unitAfterDiscount = clpNum ? unitPriceForService(key, clpNum, qty, state) : null;
+    const calcQty = key === 'asesoria' ? 1 : qty;
+    const unitAfterDiscount = clpNum ? unitPriceForService(key, clpNum, calcQty, state) : null;
     const discountPct = (clpNum && unitAfterDiscount && clpNum > 0)
       ? ((clpNum - unitAfterDiscount) / clpNum) * 100
       : 0;
@@ -2332,12 +2314,12 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
 
     let priceHTML = '';
     if(clpNum){
-      const subtotal = unitAfterDiscount * qty;
+      const subtotal = unitAfterDiscount * calcQty;
       items.push({
         key,
         icon: m.icon,
         name: serviceName,
-        qty,
+        qty: calcQty,
         qtyLabel,
         unit: unitAfterDiscount,
         subtotal,
@@ -2362,11 +2344,11 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
           ? `<div class="sc-addon">Descuento por volumen: -${discountPct.toFixed(2)}% <span>(base USD ${(clpNum/tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})})</span></div>`
           : '';
         const addonLines = addons.map(a => `<div class="sc-addon">+ ${escapeHTML(a.label)}: USD ${(a.amount/tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})} <span>mensual</span></div>`).join('');
-        if(qty > 1){
+        if(calcQty > 1){
           priceHTML = `
             <div class="sc-right">
               <div class="sc-price-unit">USD ${usdUnit.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})} <span>c/u</span></div>
-              <div class="sc-price-qty-label">${qty} ${qtyLabel}${qty!==1?'s':''}</div>
+              <div class="sc-price-qty-label">${calcQty} ${qtyLabel}${calcQty!==1?'s':''}</div>
               <div class="sc-price-total">USD ${usdTotal.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})} <span>total</span></div>
               ${discountLine}
               ${onceLine}
@@ -2386,11 +2368,11 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
           ? `<div class="sc-addon">Descuento por volumen: -${discountPct.toFixed(2)}% <span>(base $${fmtCLP(clpNum)})</span></div>`
           : '';
         const addonLines = addons.map(a => `<div class="sc-addon">+ ${escapeHTML(a.label)}: $${fmtCLP(a.amount)} <span>mensual</span></div>`).join('');
-        if(qty > 1){
+        if(calcQty > 1){
           priceHTML = `
             <div class="sc-right">
               <div class="sc-price-unit">$${fmtCLP(unitAfterDiscount)} <span>c/u</span></div>
-              <div class="sc-price-qty-label">${qty} ${qtyLabel}${qty!==1?'s':''}</div>
+              <div class="sc-price-qty-label">${calcQty} ${qtyLabel}${calcQty!==1?'s':''}</div>
               <div class="sc-price-total">$${fmtCLP(subtotal)} <span>total</span></div>
               ${discountLine}
               ${onceLine}
@@ -2411,7 +2393,7 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
         key,
         icon: m.icon,
         name: serviceName,
-        qty,
+        qty: calcQty,
         qtyLabel,
         unit: null,
         subtotal: null,
@@ -2431,7 +2413,7 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
         key,
         icon: m.icon,
         name: serviceName,
-        qty,
+        qty: calcQty,
         qtyLabel,
         unit: null,
         subtotal: null,
@@ -2482,7 +2464,7 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
 
   const billingNoteHTML = '';
 
-  return { count: proposalSvcs.length, cards, totalsHTML, billingNoteHTML, items, monthlyTotalCLP, oneTimeTotalCLP };
+  return { count: renderedCount, cards, totalsHTML, billingNoteHTML, items, monthlyTotalCLP, oneTimeTotalCLP };
 }
 
 function collectStage1State(){
@@ -2795,6 +2777,15 @@ function generateProposal(opts = {}){
     }
     if(mainSelected.length){
       const main = buildPricingBlockFromState(currentState, showUSD, tasa, stage1Block.monthlyAddonCLP);
+      if(main.count === 0 && !hasStage1 && !showMultiidiomaAddon){
+        if(!auto){
+          alert('Ingresá cantidad mayor a 0 en al menos un servicio para generar la propuesta.');
+        } else if(!silent){
+          clearPreview();
+        }
+        isGeneratingProposal = false;
+        return;
+      }
       servicesHTML = `<div class="services-list">${main.cards}${main.totalsHTML}${main.billingNoteHTML}</div>`;
       sectionCountLabel = `${main.count} ítem${main.count !== 1 ? 's' : ''}`;
       selectedCount = main.count + stage1.selected.length;
