@@ -2557,7 +2557,13 @@ function buildStage1HTML(stage1, showUSD, tasa){
   return { html, monthlyAddonCLP };
 }
 
-function buildMultiidiomaAddonHTML(){
+function buildMultiidiomaAddonHTML(showUSD, tasa){
+  const formatAddonPrice = (clp) => {
+    if(showUSD && Number.isFinite(tasa) && tasa > 0){
+      return `USD ${Math.round(clp / tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}`;
+    }
+    return `$${fmtCLP(clp)}`;
+  };
   return `
   <div class="addon-multiidioma">
     <div class="section-header">
@@ -2572,17 +2578,17 @@ function buildMultiidiomaAddonHTML(){
     <div class="addon-multi-grid">
       <div class="addon-multi-card liquid-glass">
         <div class="addon-multi-top">1 idioma adicional</div>
-        <div class="addon-multi-price">$7.000 <span>por video · por idioma</span></div>
+        <div class="addon-multi-price">${formatAddonPrice(7000)} <span>por video · por idioma</span></div>
         <div class="addon-multi-note">Valores netos sin IVA</div>
       </div>
       <div class="addon-multi-card liquid-glass">
         <div class="addon-multi-top">2 idiomas adicionales</div>
-        <div class="addon-multi-price">$6.500 <span>por video · por idioma</span></div>
+        <div class="addon-multi-price">${formatAddonPrice(6500)} <span>por video · por idioma</span></div>
         <div class="addon-multi-note">Valores netos sin IVA</div>
       </div>
       <div class="addon-multi-card liquid-glass">
         <div class="addon-multi-top">3 idiomas adicionales</div>
-        <div class="addon-multi-price">$6.000 <span>por video · por idioma</span></div>
+        <div class="addon-multi-price">${formatAddonPrice(6000)} <span>por video · por idioma</span></div>
         <div class="addon-multi-note">Valores netos sin IVA</div>
       </div>
     </div>
@@ -2709,7 +2715,7 @@ function generateProposal(opts = {}){
         const subline = item.tbd
           ? 'A cotizar'
           : (showUSD && tasa
-            ? `USD ${(item.unit).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})} c/u`
+            ? `USD ${Math.round(item.unit / tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})} c/u`
             : `$${fmtCLP(item.unit)} c/u`);
         return `
         <div class="pack-highlight-card liquid-glass">
@@ -2723,11 +2729,11 @@ function generateProposal(opts = {}){
         const left = `${item.icon} ${escapeHTML(item.name)}`;
         const middle = item.tbd
           ? 'A cotizar'
-          : `${item.qty} x ${showUSD && tasa ? `USD ${item.unit.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}` : `$${fmtCLP(item.unit)}`}`;
+          : `${item.qty} x ${showUSD && tasa ? `USD ${Math.round(item.unit / tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}` : `$${fmtCLP(item.unit)}`}`;
         const right = item.tbd
           ? 'A cotizar'
           : (showUSD && tasa
-            ? `USD ${item.subtotal.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}`
+            ? `USD ${Math.round(item.subtotal / tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}`
             : `$${fmtCLP(item.subtotal)}`);
         return `
         <div class="pack-row">
@@ -2842,7 +2848,7 @@ function generateProposal(opts = {}){
     }
   }
 
-  const multiidiomaAddonHTML = showMultiidiomaAddon ? buildMultiidiomaAddonHTML() : '';
+  const multiidiomaAddonHTML = showMultiidiomaAddon ? buildMultiidiomaAddonHTML(showUSD, tasa) : '';
   const addonSourceStates = (packsEnabled && packs.length > 0) ? packs.map(p => p.state) : [currentState];
   const serviceAddonsHTML = buildServiceAddonsHTML(showUSD, tasa, addonSourceStates);
   const usdTransferNoteHTML = showUSD
