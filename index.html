@@ -2845,6 +2845,9 @@ function generateProposal(opts = {}){
   const multiidiomaAddonHTML = showMultiidiomaAddon ? buildMultiidiomaAddonHTML() : '';
   const addonSourceStates = (packsEnabled && packs.length > 0) ? packs.map(p => p.state) : [currentState];
   const serviceAddonsHTML = buildServiceAddonsHTML(showUSD, tasa, addonSourceStates);
+  const usdTransferNoteHTML = showUSD
+    ? `<div class="billing-note liquid-glass">Nota de cobro en USD: el total está sujeto a comisiones de transferencia, las cuales se cobran extra al momento del pago.</div>`
+    : '';
   const conditionsHTML = buildConditionsHTML(includeMin3Months);
 
   const currency_label = (showUSD && tasa) ? 'USD' : 'CLP';
@@ -2858,6 +2861,7 @@ function generateProposal(opts = {}){
     sectionCountLabel,
     multiidiomaAddonHTML,
     serviceAddonsHTML,
+    usdTransferNoteHTML,
     conditionsHTML,
     examplesHTML,
     currency_label,
@@ -2903,7 +2907,7 @@ function downloadProposal(){
 }
 
 // ─── PROPOSAL HTML ────────────────────────────────────────
-function buildHTML(cliente, nota, stage1HTML, servicesHTML, count, sectionTitle, sectionCountLabel, multiidiomaAddonHTML, serviceAddonsHTML, conditionsHTML, examplesHTML, currency_label, visualCfg){
+function buildHTML(cliente, nota, stage1HTML, servicesHTML, count, sectionTitle, sectionCountLabel, multiidiomaAddonHTML, serviceAddonsHTML, usdTransferNoteHTML, conditionsHTML, examplesHTML, currency_label, visualCfg){
 const date = new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
 const hasCustomBg = !!(visualCfg && visualCfg.bgDataUrl);
 const overlay = Math.max(35, Math.min(85, Number(visualCfg && visualCfg.bgOverlay) || 58));
@@ -3646,6 +3650,8 @@ body.has-custom-bg .sc-price-tbd{
   ${examplesHTML}
 
   ${serviceAddonsHTML}
+
+  ${usdTransferNoteHTML}
 
   <div class="conds">
     <div class="section-label">Condiciones</div>
