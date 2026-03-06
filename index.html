@@ -581,8 +581,8 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
             </div>
             <div class="svc-fields">
               <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-ugc_realista30" value="80.000" placeholder="80.000"></div>
-              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc_realista30" placeholder="8" min="8"></div>
-              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 24% en la unidad 32 (tope máximo).</div>
+              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-ugc_realista30" placeholder="1" min="1"></div>
+              <div class="svc-inline-note" id="ugc_realista30-discount-note">Precio base: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento progresivo por volumen hasta 24% en la unidad 32 (tope máximo).</div>
             </div>
           </div>
 
@@ -1527,7 +1527,7 @@ const SVC_META = {
   asesoria:{ name:'Asesoría Creativa Estratégica', icon:'🧠', desc:'Servicio de dirección creativa mensual: ideas, guiones, enfoque editorial y optimización estratégica para mejorar resultados del contenido.' },
   personalizado:{ name:'Servicio personalizado', icon:'🧩', desc:'Servicio definido a medida según la reunión con el cliente. Nombre, precio y lógica de descuento configurables por propuesta.' },
   ugc:{ name:'UGC Videos para Ads (15 seg)', icon:'📱', desc:'Videos estilo UGC de 15 segundos producidos con IA para campañas de performance. Alta conversión, bajo costo.' },
-  ugc_realista30:{ name:'UGC Videos Realistas (30 seg)', icon:'🎬', desc:'Videos UGC realistas de 30 segundos producidos con IA. Precio base desde 8 unidades y descuento progresivo por volumen desde la unidad 12.' },
+  ugc_realista30:{ name:'UGC Videos Realistas (30 seg)', icon:'🎬', desc:'Videos UGC realistas de 30 segundos producidos con IA. Precio base por unidad y descuento progresivo por volumen desde la unidad 12.' },
   multiidioma:{ name:'Pack Multiidioma — Doblaje + Subtítulos IA', icon:'🌐', desc:'Doblaje con lip-sync IA + subtítulos adaptados por idioma. Add-on sobre cualquier pack UGC. Valores netos sin IVA.' },
   canciones:{ name:'Canciones Personalizadas', icon:'🎵', desc:'Composición y producción de canciones originales con voz e instrumentación generada por IA.' },
   visuales:{ name:'Visuales para Fiestas y Eventos', icon:'✨', desc:'Contenido visual inmersivo para pantallas en fiestas, eventos y activaciones: loops, VJ sets y ambientaciones.' },
@@ -1586,7 +1586,7 @@ const STAGE1_META = {
 const STAGE1_KEYS = Object.keys(STAGE1_META);
 const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','cortometraje','fotografia','ugc','ugc_realista30','ecommerce']);
 const SERVICE_MIN_QTY = {
-  ugc_realista30: 8,
+  ugc_realista30: 1,
   multiidioma: 1
 };
 const SERVICE_MAX_QTY = {
@@ -1694,7 +1694,7 @@ function getPersonalizadoConfig(state){
 
 function defaultDiscountNote(serviceKey){
   if(serviceKey === 'ugc_realista30'){
-    return 'Precio base desde 8 unidades: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento por tramos: 12=>5% | 16=>10% | 20=>15% | 24=>18% | 28=>21% | 32=>24% (tope).';
+    return 'Precio base: $80.000 CLP por video (sin IVA). Sin descuento hasta 11 unidades. Desde 12 unidades se aplica descuento por tramos: 12=>5% | 16=>10% | 20=>15% | 24=>18% | 28=>21% | 32=>24% (tope).';
   }
   if(serviceKey === 'ugc'){
     return 'Descuento por volumen: hasta 4 unidades se mantiene precio base. Desde 5 disminuye linealmente hasta llegar a 26,25% de descuento en la unidad 32 (tope máximo).';
