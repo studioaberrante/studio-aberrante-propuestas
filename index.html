@@ -2340,7 +2340,7 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
       if(showUSD && tasa){
         const usdUnit = unitAfterDiscount / tasa;
         const usdTotal = subtotal / tasa;
-        const discountLine = discountPct > 0
+        const discountLine = (discountPct > 0 && calcQty > 1)
           ? `<div class="sc-addon">Descuento por volumen: -${discountPct.toFixed(2)}% <span>(base USD ${(clpNum/tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})})</span></div>`
           : '';
         const addonLines = addons.map(a => `<div class="sc-addon">+ ${escapeHTML(a.label)}: USD ${(a.amount/tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})} <span>mensual</span></div>`).join('');
@@ -2364,7 +2364,7 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
             </div>`;
         }
       } else {
-        const discountLine = discountPct > 0
+        const discountLine = (discountPct > 0 && calcQty > 1)
           ? `<div class="sc-addon">Descuento por volumen: -${discountPct.toFixed(2)}% <span>(base $${fmtCLP(clpNum)})</span></div>`
           : '';
         const addonLines = addons.map(a => `<div class="sc-addon">+ ${escapeHTML(a.label)}: $${fmtCLP(a.amount)} <span>mensual</span></div>`).join('');
