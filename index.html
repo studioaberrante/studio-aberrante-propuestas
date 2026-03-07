@@ -461,6 +461,19 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
             </div>
           </div>
 
+          <div class="svc-card" id="svc-reels">
+            <div class="svc-card-top" onclick="toggleSvc('reels')">
+              <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+              <div class="svc-name">Reels IA</div>
+              <span class="svc-tag tag-price">Con precio</span>
+            </div>
+            <div class="svc-fields">
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-reels" placeholder="ej. 45.000"></div>
+              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-reels" placeholder="1" min="1"></div>
+              <div class="svc-inline-note" id="reels-discount-note">Reels IA: 1-4=>0% | 5-6=>3.1% | 7-8=>4.6% | 9-10=>7.7% | 11-12=>10.8% | 13-16=>12.3% | 17-20=>13.8% | 21-24=>14.6% | 25-32=>15%.</div>
+            </div>
+          </div>
+
           <div class="svc-card" id="svc-podcast">
             <div class="svc-card-top" onclick="toggleSvc('podcast')">
               <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
@@ -939,7 +952,7 @@ const SERVICE_ADDON_DEFS = [
     emoji:'📝',
     desc:'Versión subtitulada optimizada para pauta y consumo sin audio.',
     unitText:'por video',
-    baseServices:['podcast','podcast_youtube','ugc','ugc_realista30','cortometraje'],
+    baseServices:['podcast','podcast_youtube','ugc','ugc_realista30','cortometraje','reels'],
     defaultPct:18
   }
 ];
@@ -1533,7 +1546,8 @@ function fmtCLP(n){
 // ─── SERVICE META ─────────────────────────────────────────
 const SVC_META = {
   audiovisual:{ name:'Contenido Audiovisual IA', icon:'🎬', desc:'Videos, reels, teasers y piezas audiovisuales generadas 100% con inteligencia artificial. Velocidad, escala y calidad sin producción tradicional.' },
-  cortometraje:{ name:'Reels IA', icon:'🎥', desc:'Reels generados con IA para contenido orgánico y performance. Precio base manual y descuento automático por volumen.' },
+  cortometraje:{ name:'Cortometrajes IA', icon:'🎥', desc:'Producción de cortometrajes narrativos generados con IA. Guion, visuales, voz y montaje con tecnología de última generación.' },
+  reels:{ name:'Reels IA', icon:'🎞️', desc:'Reels generados con IA para contenido orgánico y performance. Precio base manual y descuento automático por volumen.' },
   podcast:{ name:'Video Podcast IA Instagram (hasta 1:30 min)', icon:'🎙️', desc:'Video podcast corto optimizado para Instagram y pauta. Producción con IA, guion y edición para performance.' },
   podcast_youtube:{ name:'Video Podcast IA YouTube (1:30 a 3:00 min)', icon:'📺', desc:'Video podcast extendido para YouTube con mayor desarrollo narrativo y retención, producido con IA.' },
   fotografia:{ name:'Fotografía Generada con IA', icon:'📸', desc:'Imágenes fotorrealistas de personas, productos, espacios y conceptos. Sin cámara, sin locación, sin límites creativos.' },
@@ -1599,7 +1613,7 @@ const STAGE1_META = {
   }
 };
 const STAGE1_KEYS = Object.keys(STAGE1_META);
-const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','podcast_youtube','cortometraje','fotografia','ugc','ugc_realista30']);
+const VOLUME_DISCOUNT_SERVICES = new Set(['podcast','podcast_youtube','cortometraje','reels','fotografia','ugc','ugc_realista30']);
 const SERVICE_MIN_QTY = {
   ugc_realista30: 1,
   multiidioma: 1
@@ -1614,6 +1628,16 @@ const GLOBAL_MAX_DISCOUNT_PCT = 37.5;
 const GLOBAL_MIN_PRICE_FACTOR = 0.625;
 const SERVICE_TIER_DISCOUNT_RULES = {
   cortometraje: [
+    { minQty: 5, pct: 3.1 },
+    { minQty: 7, pct: 4.6 },
+    { minQty: 9, pct: 7.7 },
+    { minQty: 11, pct: 10.8 },
+    { minQty: 13, pct: 12.3 },
+    { minQty: 17, pct: 13.8 },
+    { minQty: 21, pct: 14.6 },
+    { minQty: 25, pct: 15.0 }
+  ],
+  reels: [
     { minQty: 5, pct: 3.1 },
     { minQty: 7, pct: 4.6 },
     { minQty: 9, pct: 7.7 },
@@ -1743,6 +1767,9 @@ function getPersonalizadoConfig(state){
 
 function defaultDiscountNote(serviceKey){
   if(serviceKey === 'cortometraje'){
+    return 'Cortometrajes IA: 1-4=>0% | 5-6=>3.1% | 7-8=>4.6% | 9-10=>7.7% | 11-12=>10.8% | 13-16=>12.3% | 17-20=>13.8% | 21-24=>14.6% | 25-32=>15%.';
+  }
+  if(serviceKey === 'reels'){
     return 'Reels IA: 1-4=>0% | 5-6=>3.1% | 7-8=>4.6% | 9-10=>7.7% | 11-12=>10.8% | 13-16=>12.3% | 17-20=>13.8% | 21-24=>14.6% | 25-32=>15%.';
   }
   if(serviceKey === 'podcast'){
@@ -2256,6 +2283,7 @@ setVisualStep(visualStepOpen);
 updateVolumeDiscountPreview('podcast');
 updateVolumeDiscountPreview('podcast_youtube');
 updateVolumeDiscountPreview('cortometraje');
+updateVolumeDiscountPreview('reels');
 updateVolumeDiscountPreview('fotografia');
 updateVolumeDiscountPreview('ugc');
 updateVolumeDiscountPreview('ugc_realista30');
