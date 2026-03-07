@@ -2313,8 +2313,11 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
     const clpRaw = state && state.prices ? state.prices[key] : '';
     const qtyRaw = state && state.qty ? state.qty[key] : '';
     const clpNum = getServiceBaseCLP(key, clpRaw);
+    const hasQtyValue = String(qtyRaw ?? '').trim() !== '';
     const parsedQty = parseInt(qtyRaw,10);
-    const qty = Number.isFinite(parsedQty) ? Math.max(0, parsedQty) : 0;
+    const qty = hasQtyValue
+      ? (Number.isFinite(parsedQty) ? Math.max(0, parsedQty) : 0)
+      : 1;
     if(qty <= 0) return;
     renderedCount += 1;
     const qtyLabel = key === 'multiidioma' ? 'idioma' : 'unidad';
