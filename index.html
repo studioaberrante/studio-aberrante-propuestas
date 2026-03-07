@@ -2321,6 +2321,8 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
         name: serviceName,
         qty: calcQty,
         qtyLabel,
+        baseUnit: clpNum,
+        discountPct,
         unit: unitAfterDiscount,
         subtotal,
         tbd: false
@@ -2715,6 +2717,9 @@ function generateProposal(opts = {}){
       }).join('');
       const rows = data.items.map(item => {
         const left = `${item.icon} ${escapeHTML(item.name)}`;
+        const discountNote = (!item.tbd && Number(item.discountPct) > 0 && Number(item.qty) > 1)
+          ? `<div class="pack-row-discount">Descuento por volumen: -${Number(item.discountPct).toFixed(2)}% (base ${showUSD && tasa ? `USD ${Math.round(Number(item.baseUnit || 0) / tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}` : `$${fmtCLP(Number(item.baseUnit || 0))}`})</div>`
+          : '';
         const middle = item.tbd
           ? 'A cotizar'
           : `${item.qty} x ${showUSD && tasa ? `USD ${Math.round(item.unit / tasa).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}` : `$${fmtCLP(item.unit)}`}`;
@@ -2726,7 +2731,7 @@ function generateProposal(opts = {}){
         return `
         <div class="pack-row">
           <div class="pack-row-left">${left}</div>
-          <div class="pack-row-mid">${middle}</div>
+          <div class="pack-row-mid">${middle}${discountNote}</div>
           <div class="pack-row-right">${right}</div>
         </div>`;
       }).join('');
@@ -3206,6 +3211,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,252,0.78);backdrop
 .pack-row:last-child{border-bottom:none}
 .pack-row-left{font-size:15px;font-weight:600}
 .pack-row-mid{font-size:13px;color:var(--mid)}
+.pack-row-discount{font-size:12px;color:var(--muted);margin-top:4px}
 .pack-row-right{font-size:16px;font-weight:700;color:var(--black);white-space:nowrap}
 .pack-row-maint{background:rgba(79,163,209,.07)}
 .pack-services{gap:8px}
@@ -3522,7 +3528,8 @@ body.has-custom-bg .total-row-secondary .total-label,
 body.has-custom-bg .total-row-secondary .total-amount,
 body.has-custom-bg .billing-note,
 body.has-custom-bg .pack-highlight-sub,
-body.has-custom-bg .pack-row-mid{
+body.has-custom-bg .pack-row-mid,
+body.has-custom-bg .pack-row-discount{
   color:#eef3f7;
 }
 body.has-custom-bg .sc-price-main,
