@@ -541,6 +541,19 @@ body{background:var(--offwhite);color:var(--black);font-family:'DM Sans',sans-se
             </div>
           </div>
 
+          <div class="svc-card" id="svc-direccion">
+            <div class="svc-card-top" onclick="toggleSvc('direccion')">
+              <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+              <div class="svc-name">Dirección Estratégica</div>
+              <span class="svc-tag tag-price">Con precio</span>
+            </div>
+            <div class="svc-fields">
+              <div class="field"><label class="field-label">Precio CLP</label><input type="text" class="field-input" id="clp-direccion" placeholder="ej. 450.000"></div>
+              <div class="field"><label class="field-label">Cantidad</label><input type="number" class="field-input" id="qty-direccion" placeholder="1" min="1"></div>
+              <div class="svc-inline-note">Precio fijo mensual por pack. Sin descuento por volumen.</div>
+            </div>
+          </div>
+
           <div class="svc-card" id="svc-personalizado">
             <div class="svc-card-top" onclick="toggleSvc('personalizado')">
               <div class="svc-checkbox"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
@@ -1554,6 +1567,7 @@ const SVC_META = {
   campania:{ name:'Campañas Publicitarias IA', icon:'📣', desc:'Estrategia y producción completa de campañas publicitarias con assets generados por IA: gráficas, videos, copy y segmentación.' },
   consultoria:{ name:'Consultoría para Empresas', icon:'💼', desc:'Acompañamiento estratégico para integrar IA en los procesos de comunicación, marketing y producción de contenido de tu empresa.' },
   asesoria:{ name:'Asesoría Creativa Estratégica', icon:'🧠', desc:'Servicio de dirección creativa mensual: ideas, guiones, enfoque editorial y optimización estratégica para mejorar resultados del contenido.' },
+  direccion:{ name:'Dirección Estratégica', icon:'🎯', desc:'Dirección creativa, construcción de identidad y estrategia de contenido del influencer IA.' },
   personalizado:{ name:'Servicio personalizado', icon:'🧩', desc:'Servicio definido a medida según la reunión con el cliente. Nombre, precio y lógica de descuento configurables por propuesta.' },
   ugc:{ name:'UGC Ads IA (hasta 15 segundos)', icon:'📱', desc:'UGC para anuncios de respuesta directa. Valor unitario optimizado por volumen. Precios netos sin IVA.' },
   ugc_realista30:{ name:'UGC Realista IA (hasta 30 segundos)', icon:'🎬', desc:'UGC realista para campañas con mayor storytelling. Valor unitario optimizado por volumen. Precios netos sin IVA.' },
@@ -1795,7 +1809,7 @@ function unitPriceForService(serviceKey, baseUnitPrice, qty, state){
     const cfg = getPersonalizadoConfig(state);
     return calcUnitPriceLinear(baseUnitPrice, qty, cfg.maxDiscPct, cfg.discFrom - 1, cfg.discTo);
   }
-  if(serviceKey === 'asesoria'){
+  if(serviceKey === 'asesoria' || serviceKey === 'direccion'){
     return baseUnitPrice;
   }
   const tierUnit = getTierUnitPrice(serviceKey, Math.max(1, qty || 1));
@@ -2326,7 +2340,7 @@ function buildPricingBlockFromState(state, showUSD, tasa, extraMonthlyCLP = 0){
       : '';
     const serviceName = customName || m.name;
     const serviceDesc = escapeHTML(m.desc).replace(/\n/g,'<br>');
-    const calcQty = key === 'asesoria' ? 1 : qty;
+    const calcQty = (key === 'asesoria' || key === 'direccion') ? 1 : qty;
     const unitAfterDiscount = clpNum ? unitPriceForService(key, clpNum, calcQty, state) : null;
     const discountPct = (clpNum && unitAfterDiscount && clpNum > 0)
       ? ((clpNum - unitAfterDiscount) / clpNum) * 100
